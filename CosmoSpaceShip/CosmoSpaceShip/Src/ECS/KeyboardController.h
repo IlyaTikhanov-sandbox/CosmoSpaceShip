@@ -3,7 +3,6 @@
 #include "../Game.h"
 #include "ECS.h"
 #include "Components.h"
-//#include "TimingComponent.h"
 #include "FigthComponent.h"
 
 class KeyboardController : public Component
@@ -96,14 +95,19 @@ public:
 			case SDLK_UP:
 				fighting->Attack(transform->position, Vector2D(0, -1), SoundHandler::soundUpAttack);
 				break;
+			case SDLK_SPACE:
+				transform->position.x += transform->direction.x * 150;
+				break;
 			case SDLK_w:
 				transform->velocity.y = -1.65f;
 				break;
 			case SDLK_a:
 				transform->velocity.x = -1.65f;
+				transform->direction.x = -1;
 				break;
 			case SDLK_d:
 				transform->velocity.x = 1.65f;
+				transform->direction.x = 1;
 				break;
 			case SDLK_s:
 				transform->velocity.y = 1.65f;
