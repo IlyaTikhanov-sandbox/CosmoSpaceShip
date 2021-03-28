@@ -88,9 +88,9 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 
 	playerInit();
 
-	InitLvl1(3);
+	InitLvl1(0);
 
-	BossInit(500.0f, 70.0f, "BossShip");
+	//BossInit(500.0f, 70.0f, "BossShip");
 }
 
 auto& tiles(manager.getGroup(Game::groupMap));
@@ -129,7 +129,7 @@ void Game::handleEvents()
 		{
 			e->addGroup(Game::gpoupEnemies);
 		}
-		std::cout << "Added Boss to enemies" << std::endl;
+		//std::cout << "Added Boss to enemies" << std::endl;
 	}
 
 	sounder->handleEvents();
