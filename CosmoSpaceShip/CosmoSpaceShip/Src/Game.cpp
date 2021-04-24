@@ -486,7 +486,7 @@ void Game::WeaponsInit()
 void Game::playerInit()
 {
 	                          //rg, sp, dam,   texid,        delay, rot?,sounder,              sound,              anim, scale_ = 1
-	player.addComponent<TransformComponent>(610.0f, 815.0f, 3, 7);
+	player.addComponent<TransformComponent>(610.0f, 815.0f, PLAYER_SCALE, 7);
 	player.addComponent<SpriteComponent>("Ship", true);
 	player.addComponent<TimingComponent>();
 	player.addComponent<FigthComponent>(assets, player_weapon, Game::groupLabels::groupPlayerProjectiles);

@@ -100,16 +100,21 @@ public:
 				transform->velocity.y = -1.65f;
 				break;
 			case SDLK_a:
-				transform->velocity.x = -1.65f;
+				transform->velocity.x  = -1.65f;
+				transform->direction.x = -1;
 				break;
 			case SDLK_d:
-				transform->velocity.x = 1.65f;
+				transform->velocity.x  = 1.65f;
+				transform->direction.x = 1;
 				break;
 			case SDLK_s:
 				transform->velocity.y = 1.65f;
 				break;
 			case SDLK_p:
 				Game::pause = true;
+				break;
+			case SDLK_SPACE:
+				transform->Leap(100);
 				break;
 			//case SDLK_o:
 			//	Game::switch_on = false;
