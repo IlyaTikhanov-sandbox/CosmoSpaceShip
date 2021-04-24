@@ -134,7 +134,7 @@ public:
 		int XnextPosition = position.x + direction.x * length;
 		if (XnextPosition < 0)
 		{
-			XnextPosition = 1;
+			XnextPosition = 68;
 		}
 		else if (XnextPosition + 32 * PLAYER_SCALE * 2 > WINDOW_WIDTH)
 		{
@@ -142,7 +142,5 @@ public:
 			XnextPosition = PLAY_WIDTH - 32 * PLAYER_SCALE - 10;
 		}
 		position.x = XnextPosition;
-
-
 	}
 };

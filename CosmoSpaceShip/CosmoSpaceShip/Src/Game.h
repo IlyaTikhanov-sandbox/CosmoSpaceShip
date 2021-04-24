@@ -20,6 +20,7 @@ class ColliderComponent;
 class AssetManager;
 class Entity;
 class Weapon;
+class Menu;
 
 enum AttackType : int
 {
@@ -59,6 +60,7 @@ struct WeaponParams
 
 enum LevelStage : int
 {
+	StageMenu,
 	StageRegular,
 	StageBoss
 };
@@ -88,6 +90,23 @@ public:
 
 	bool isEntityOnDisplay(Entity * e);
 
+	//MenuFunctions
+	void CreateMenu();
+	void prepareGameMenu();
+	void handleGameMenu();
+	void activateMenuButton(int currentButton);
+	void updateGameMenu();
+	void renderGameMenu();
+	bool isGameMenuActive();
+	bool isGameMenuGameClosed();
+	void switchToGameMenu();
+	bool isNewGame()  { return new_game; }
+	void newGameOff() { new_game = false; }
+	
+
+	void drawBackground();
+
+	static Menu* m_gameMenu;
 	static SDL_Renderer * renderer;
 	static SDL_Event event;
 	static bool isRunning;
@@ -98,7 +117,8 @@ public:
 	bool rock = false;
 	static bool pause;
 	static bool switch_on;
-	LevelStage currentStage;
+	static LevelStage currentStage;
+
 
 	WeaponParams PlayerWeaponParams;
 	WeaponParams EnemyWeaponParams;
@@ -112,6 +132,7 @@ public:
 	//Temp solution
 	std::vector<std::vector <char>> walkinMap;
 
+	//Game functions
 	void LoadAssets();
 	void InitWeapon(WeaponParams * weapon, SoundHandler * sounder);
 	void WeaponsInit();
@@ -119,6 +140,11 @@ public:
 	void enemyInit(float xpos, float ypos, std::string texture);
 	void BossInit(float xpos, float ypos, const char * texture);
 	void InitLvl1(int Num_Enemies = 3);
+	void killEnemies();
+	void resetGame();
+	void reInit();
+
+	bool isPlayerActive();
 
 	enum groupLabels : std::size_t
 	{
@@ -148,5 +174,13 @@ private:
 	int cnt = 0;
 	SDL_Window *window;
 	int lvl_change_timer = 0;
+
+	bool new_game = false;
+	int gameMenuDelay = 10;
+	int gameMenuCooldown;
+	int gameMenuCooldown2;
+
+	int m_playWidth;
+	int m_playHeight;
 };
 

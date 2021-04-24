@@ -100,7 +100,7 @@ void LogicComponent::update()
 	{
 		switch (currentLogic)
 		{
-		case LogicType::None:
+		case LogicType::LogicNone:
 
 			break;
 		case LogicType::FollowPath:
