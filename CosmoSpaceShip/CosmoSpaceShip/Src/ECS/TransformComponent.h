@@ -123,4 +123,26 @@ public:
 	{
 		prevPosition = position;
 	}
+
+	void Leap(int length)
+	{
+		//if (abs((position.x + direction.x * length) - WINDOW_WIDTH / 2) < WINDOW_WIDTH / 2 - PERSON_SIZE)
+		//{
+		//	std::cout << "LEAP!" << std::endl;
+		//	position.x += direction.x * length;
+		//}
+		int XnextPosition = position.x + direction.x * length;
+		if (XnextPosition < 0)
+		{
+			XnextPosition = 1;
+		}
+		else if (XnextPosition + 32 * PLAYER_SCALE * 2 > WINDOW_WIDTH)
+		{
+			std::cout << "RIGHT LEAP PREVENT OUT OF BORDER!!" << std::endl;
+			XnextPosition = PLAY_WIDTH - 32 * PLAYER_SCALE - 10;
+		}
+		position.x = XnextPosition;
+
+
+	}
 };
