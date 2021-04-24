@@ -12,5 +12,6 @@
 #include "HealthComponent.h"
 #include "LogicComponent.h"
 #include "Weapons.h"
+#include "UILabel.h"
 
 

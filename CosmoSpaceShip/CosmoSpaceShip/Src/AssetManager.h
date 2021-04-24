@@ -5,6 +5,7 @@
 #include "TextureManager.h"
 #include "Vector2D.h"
 #include "ECS/ECS.h"
+#include "SDL_ttf.h"
 
 class AssetManager
 {
@@ -25,8 +26,12 @@ public:
 		return textures[id].second;
 	}
 
+	void AddFont(std::string id, std::string path, int fontSize);
+	TTF_Font* GetFont(std::string id);
+
 private:
 	Manager* manager;
 	std::map<std::string, std::pair<SDL_Texture*, int>> textures;
+	std::map<std::string, TTF_Font*> fonts;
 	int cooldown = 60;
 };
