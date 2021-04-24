@@ -7,6 +7,7 @@
 #include "AssetManager.h"
 #include <vector>
 #include <set>
+#include <sstream>
 
 
 
@@ -37,6 +38,7 @@ bool Game::pause = false;
 int Game::commonPlayerSpeed = 3;
 
 auto& player(manager.addEntity());
+auto& label(manager.addEntity());
 
 
 Game::Game()
@@ -76,6 +78,11 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 		isRunning = true;
 	}
 
+	if (TTF_Init() == -1)
+	{
+		std::cout << "Error Initializing SDL TTF" << std::endl;
+	}
+
 	currentStage = LevelStage::StageRegular;
 
 	sounder = new SoundHandler();
@@ -83,6 +90,11 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 
 	LoadAssets(); //also map gets created
 
+
+	//Label Init
+	///SDL_Color white = { 255,255,255,255 };
+	///label.addComponent<UILabel>(10, 10, "Hello", "courier", white);
+	//
 	
 	WeaponsInit();
 
@@ -173,6 +185,13 @@ void Game::update()
 	{
 		pr->getComponent<TransformComponent>().updPrevPostition();
 	}
+
+	// Mechanizm to stream some info to the screen
+	///std::stringstream ss;
+	///ss << "Player" << "(" << prevPlayerPos.x << " , " << prevPlayerPos.y << ")";
+	///label.getComponent<UILabel>().SetLabelText(ss.str(), "courier");
+	//
+
 
 	//update all components to the current frame state
 	manager.refresh();
@@ -315,6 +334,8 @@ void Game::render()
 		p->draw();
 	}
 	
+
+	label.draw();
 	
 	SDL_RenderPresent(renderer);
 }
@@ -368,6 +389,8 @@ void Game::LoadAssets()
 	assets->AddTexture("BossUsualAttack", "assets/BossUsualAttack.png", 8);
 	assets->AddTexture("BossRicochetAttack", "assets/BossRicochetAttack.png", 8);
 	assets->AddTexture("BossDenchik", "assets/BossDen.png", 64);
+
+	assets->AddFont("courier", "assets/cour.ttf", 32);
 
 	map = new Map("space", MAP_TILE_SCALE, 32);
 	map->LoadMap("assets/space_map.map", WIDTH_IN_TILES, HEIGHT_IN_TILES,walkinMap);
