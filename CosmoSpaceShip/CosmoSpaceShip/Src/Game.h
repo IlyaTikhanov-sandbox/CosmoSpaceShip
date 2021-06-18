@@ -79,12 +79,7 @@ public:
 	void render();
 	void clean();
 
-	void ChangeLevel()
-	{
-		int num = currentStage;
-		++num;
-		currentStage = static_cast<LevelStage>(num);
-	}
+	void ChangeLevel();
 
 	bool AllEnemiesAreDead();
 
