@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "TextureManager.h"
 #include "Map.h"
+#include "ECS/Menu.h"
 #include "ECS/Components.h"
 #include "Vector2D.h"
 #include "Collision.h"
@@ -25,10 +26,12 @@ SDL_Event Game::event;
 SDL_Rect Game::camera = {32 * MAP_TILE_SCALE,32 * MAP_TILE_SCALE, WINDOW_WIDTH - (32 * MAP_TILE_SCALE) * 2, WINDOW_HEIGHT - (32 * MAP_TILE_SCALE) * 2};
 
 AssetManager* Game::assets = new AssetManager(&manager);
+Menu* Game::m_gameMenu = nullptr;
 
 
 
 bool Game::switch_on = true;
+LevelStage Game::currentStage = LevelStage::StageMenu;
 
 
 
@@ -37,12 +40,19 @@ bool Game::pause = false;
 
 int Game::commonPlayerSpeed = 3;
 
-auto& player(manager.addEntity());
+//auto& player(manager.addEntity());
 auto& label(manager.addEntity());
+//MenuLabels
+auto& playLabel(manager.addEntity());
+auto& exitLabel(manager.addEntity());
 
 
 Game::Game()
-{}
+{
+	currentStage      = StageMenu;
+	gameMenuCooldown  = gameMenuDelay;
+	gameMenuCooldown2 = gameMenuDelay;
+}
 
 Game::~Game()
 {}
@@ -51,6 +61,9 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 {
 	//switch_on = true;
 	int flags = 0;
+
+	m_playHeight = height;
+	m_playWidth  = width;
 	
 	if (fullscreen)
 	{
@@ -83,7 +96,7 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 		std::cout << "Error Initializing SDL TTF" << std::endl;
 	}
 
-	currentStage = LevelStage::StageRegular;
+	//currentStage = LevelStage::StageRegular; Uncomment to skip MENU
 
 	sounder = new SoundHandler();
 	sounder->init();
@@ -103,6 +116,8 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 	InitLvl1(3);
 
 	BossInit(500.0f, 70.0f, "BossShip");
+
+	CreateMenu();
 }
 
 auto& tiles(manager.getGroup(Game::groupMap));
@@ -116,10 +131,16 @@ auto& Weapons(manager.getGroup(Game::gpoupWeapons));
 
 void Game::handleEvents()
 {
-	if (!player.isActive())
+	for (auto& player : manager.getGroup(Game::groupPlayers))
 	{
-		isRunning = false;
+		if (!player->isActive())
+		{
+			resetGame();
+			switchToGameMenu();
+			new_game = true;
+		}
 	}
+	
 
 	
 	if (AllEnemiesAreDead())
@@ -151,13 +172,14 @@ void Game::handleEvents()
 	switch (event.type)
 	{
 	case SDL_QUIT :
-		isRunning = false;
+	//	isRunning = false;
 		break;
 	default:
 		break;
 	}
 }
 
+/*
 void Game::TimingHandle()
 {
 	player.getComponent<TransformComponent>().speed = commonPlayerSpeed;
@@ -172,6 +194,7 @@ void Game::TimingHandle()
 		}
 	}
 }
+*/
 
 
 void Game::update()
@@ -179,7 +202,12 @@ void Game::update()
 	//TimingHandle();
 
 	//Player position from previous frame
-	Vector2D prevPlayerPos = player.getComponent<TransformComponent>().position;
+	Vector2D prevPlayerPos;
+	for (auto& player : manager.getGroup(Game::groupPlayers))
+	{
+		prevPlayerPos = player->getComponent<TransformComponent>().position;
+	}
+	//Vector2D 
 	//std::cout << "Player width: " << player.getComponent<TransformComponent>().width << std::endl;
 	for (auto& pr : EnemyProjectiles)
 	{
@@ -224,13 +252,22 @@ void Game::update()
 	for (auto& pr : EnemyProjectiles)
 	{
 		SDL_Rect prCol = pr->getComponent<ColliderComponent>().collider;
-		SDL_Rect plCol = player.getComponent<ColliderComponent>().collider;
+		SDL_Rect plCol;
+		for (auto& player : manager.getGroup(Game::groupPlayers))
+		{
+			plCol = player->getComponent<ColliderComponent>().collider;
+		}
+		
 		if (Collision::AABB(prCol, plCol))
 		{
 			std::cout << "enemy hit player" << std::endl;
 			//player.getComponent<HealthComponent>().gotHit();
 			//player.getComponent<HealthComponent>().update();
-			player.getComponent<HealthComponent>().decreaseHP(pr->getComponent<ProjectileComponent>().getDamage());
+			for (auto& player : manager.getGroup(Game::groupPlayers))
+			{
+				player->getComponent<HealthComponent>().decreaseHP(pr->getComponent<ProjectileComponent>().getDamage());
+			}
+			
 			pr->destroy();
 		}
 		else
@@ -242,14 +279,23 @@ void Game::update()
 #endif 
 
 	//Blocking Collision
-	SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
+	SDL_Rect playerCol;
+	for (auto& player : manager.getGroup(Game::groupPlayers))
+	{
+		playerCol = player->getComponent<ColliderComponent>().collider;
+	}
+	
 	SDL_Rect enemyCol;
 	for (auto& c : colliders)
 	{
 		SDL_Rect cCol = c->getComponent<ColliderComponent>().collider;
 		if (Collision::AABB(playerCol, cCol))
 		{
-			player.getComponent<TransformComponent>().position = prevPlayerPos;
+			for (auto& player : manager.getGroup(Game::groupPlayers))
+			{
+				player->getComponent<TransformComponent>().position = prevPlayerPos;
+			}
+			
 		}
 		for (auto& e : enemies)
 		{
@@ -347,6 +393,47 @@ void Game::clean()
 	SDL_Quit();
 }
 
+void Game::CreateMenu()
+{
+	m_gameMenu = new Menu();
+}
+
+void Game::prepareGameMenu()
+{
+	SDL_Color white = { 255,255,255,255 };
+	playLabel.addComponent<UILabel>(m_playWidth / 2 - 48, m_playHeight / 2 - 200,      "play", "courier", white);
+	exitLabel.addComponent<UILabel>(m_playWidth / 2 - 48, m_playHeight / 2 - 200 + 48, "exit", "courier", white);
+	//playLabel.addComponent<UILabel>(m_gameMenu->getLabelbyKey("play")); TBD: find out why it is not working
+}
+
+void Game::updateGameMenu()
+{
+	//update all components to the current frame state
+	manager.refresh();
+	manager.update();
+
+	if (gameMenuCooldown != 0)
+		--gameMenuCooldown;
+	if (gameMenuCooldown2 != 0)
+		--gameMenuCooldown2;
+
+	SDL_Color red   = { 255,0,0,255 };
+	SDL_Color white = { 255,255,255,255 };
+
+	switch (m_gameMenu->getCurrentButton())
+	{
+	case MenuButtons::Play: 
+		playLabel.getComponent<UILabel>().SetLabelColor(red);
+		exitLabel.getComponent<UILabel>().SetLabelColor(white);
+		break;
+	case MenuButtons::Exit:
+		exitLabel.getComponent<UILabel>().SetLabelColor(red);
+		playLabel.getComponent<UILabel>().SetLabelColor(white);
+	default:
+		break;
+	}
+}
+
 bool Game::AllEnemiesAreDead()
 {
 	int DeadEnemies = 0;
@@ -370,6 +457,116 @@ bool Game::isEntityOnDisplay(Entity * e)
 	return false;
 }
 
+bool Game::isGameMenuActive()
+{
+	return m_gameMenu->isMenuActive();
+}
+
+bool Game::isGameMenuGameClosed()
+{
+	return m_gameMenu->isMenuGameClosed();
+}
+
+void Game::switchToGameMenu()
+{
+	currentStage = LevelStage::StageMenu;
+	m_gameMenu->resetCurrentButton();
+	renderGameMenu();
+}
+
+
+
+void Game::renderGameMenu()
+{
+	SDL_RenderClear(renderer);
+
+	drawBackground();
+
+	playLabel.draw();
+	exitLabel.draw();
+	
+	SDL_RenderPresent(renderer);
+}
+
+void Game::handleGameMenu()
+{
+	SDL_PollEvent(&event);
+
+	SDL_Color red   = { 255,0,0,255 };
+	SDL_Color white = { 255,0,0,255 };
+
+	if (Game::event.type == SDL_KEYDOWN)
+	{
+		if (gameMenuCooldown == 0)
+		{
+			gameMenuCooldown = gameMenuDelay;
+			switch (Game::event.key.keysym.sym)
+			{
+			case SDLK_DOWN:
+				m_gameMenu->keyDown();
+				break;
+			case SDLK_UP:
+				m_gameMenu->keyUp();
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	if (Game::event.type == SDL_KEYUP)
+	{
+		if (gameMenuCooldown2 == 0)
+		{
+			gameMenuCooldown2 = gameMenuDelay;
+			switch (Game::event.key.keysym.sym)
+			{
+			case SDLK_DOWN:
+				break;
+			case SDLK_RETURN:
+				activateMenuButton(m_gameMenu->getCurrentButton());
+				break;
+
+			case SDLK_ESCAPE:
+				//m_gameMenu->changeMenuStatus(MenuStatus::GameClosed);
+				//Game::isRunning = false;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	std::cout << "Current Button is : " << m_gameMenu->getCurrentButton() << std::endl;
+}
+
+void Game::activateMenuButton(int currentButton)
+{
+	switch (currentButton)
+	{
+	case MenuButtons::Play:
+		std::cout << "Play button was hit!" << std::endl;
+		m_gameMenu->changeMenuStatus(MenuStatus::Finished);
+		currentStage = LevelStage::StageRegular;
+		break;
+	case MenuButtons::Exit:
+		std::cout << "Exit button was hit!" << std::endl;
+		m_gameMenu->changeMenuStatus(MenuStatus::GameClosed);
+		Game::isRunning = false;
+		break;
+	default:
+		break;
+	}
+}
+
+void Game::drawBackground()
+{
+	for (auto& t : tiles)
+	{
+		t->draw();
+	}
+}
+
 void Game::LoadAssets()
 {
 	assets->AddTexture("space", "assets/space_map_tileset.png");
@@ -390,7 +587,7 @@ void Game::LoadAssets()
 	assets->AddTexture("BossRicochetAttack", "assets/BossRicochetAttack.png", 8);
 	assets->AddTexture("BossDenchik", "assets/BossDen.png", 64);
 
-	assets->AddFont("courier", "assets/cour.ttf", 32);
+	assets->AddFont("courier", "assets/cour.ttf", 48);
 
 	map = new Map("space", MAP_TILE_SCALE, 32);
 	map->LoadMap("assets/space_map.map", WIDTH_IN_TILES, HEIGHT_IN_TILES,walkinMap);
@@ -509,38 +706,55 @@ void Game::WeaponsInit()
 void Game::playerInit()
 {
 	                          //rg, sp, dam,   texid,        delay, rot?,sounder,              sound,              anim, scale_ = 1
-	player.addComponent<TransformComponent>(610.0f, 815.0f, PLAYER_SCALE, 7);
-	player.addComponent<SpriteComponent>("Ship", true);
-	player.addComponent<TimingComponent>();
-	player.addComponent<FigthComponent>(assets, player_weapon, Game::groupLabels::groupPlayerProjectiles);
-	player.addComponent<ColliderComponent>("player");
-	player.addComponent<HealthComponent>(100);
-	player.addComponent<KeyboardController>(sounder);
-	player.addGroup(groupPlayers);
+	//Getting an exception while the second game round
+	//cuz player has been removed from manager? smth like this
+	//need to get rid of using global player and access player from manager.getGroup(groupPlayers) in every place that calls player
+	//then we might be able to create player again and again like enemies
+	//since it has keyboard controller we will have the control...
+	if (manager.getGroup(groupPlayers).empty())
+	{
+		auto& player(manager.addEntity());
+		player.addGroup(groupPlayers);
+	}
+	for (auto& player : manager.getGroup(Game::groupPlayers))
+	{
+		//player.addGroup(groupPlayers);
+		player->addComponent<TransformComponent>(610.0f, 815.0f, PLAYER_SCALE, 7);
+		player->addComponent<SpriteComponent>("Ship", true);
+		player->addComponent<TimingComponent>();
+		player->addComponent<FigthComponent>(assets, player_weapon, Game::groupLabels::groupPlayerProjectiles);
+		player->addComponent<ColliderComponent>("player");
+		player->addComponent<HealthComponent>(100);
+		player->addComponent<KeyboardController>(sounder);
+	}
+	
+	
 }
 
 void Game::enemyInit(float xpos, float ypos, std::string texture)
 {
 	auto& enemy(manager.addEntity());                 //scale
+	enemy.addGroup(gpoupEnemies);
 	enemy.addComponent<TransformComponent>(xpos, ypos,    3,    6);
 	enemy.addComponent<SpriteComponent>(texture, true);
 	enemy.addComponent<FigthComponent>(assets, enemy_weapon, Game::groupLabels::groupEnemyProjectiles);
 	enemy.addComponent<ColliderComponent>("enemy");
 	enemy.addComponent<HealthComponent>();
 	enemy.addComponent<LogicComponent>(LogicType::EasyLogic);
-	enemy.addGroup(gpoupEnemies);
+	
 }
 
 void Game::BossInit(float xpos, float ypos, const char * texture)
 {
 	auto& boss(manager.addEntity());
+	boss.addGroup(groupBoss);
 	boss.addComponent<TransformComponent>(xpos, ypos, assets->GetTextureWidth(texture), assets->GetTextureWidth(texture), 5, 1);
 	boss.addComponent<SpriteComponent>(texture, false,assets->GetTextureWidth(texture));
 	boss.addComponent<FigthComponent>(assets, boss_weapon, Game::groupLabels::groupEnemyProjectiles);
 	boss.addComponent<ColliderComponent>("Boss");
-	boss.addComponent<HealthComponent>(1500);
+	boss.addComponent<HealthComponent>(500);
 	boss.addComponent<LogicComponent>(LogicType::BossLogic);
-	boss.addGroup(groupBoss);
+	
 }
 
 std::string PickTexture(int rand_id)
@@ -589,5 +803,60 @@ void Game::InitLvl1(int Num_Enemies)
 			enemyInit(new_pos, 70.0f, PickTexture(TexId(rng)));
 		}
 	}
+}
+
+void Game::killEnemies()
+{
+	//manager.getGroup(gpoupEnemies).clear();
+	//manager.getGroup(groupBoss).clear();
+	//manager.getGroup(gpoupWeapons).clear();
+	//manager.getGroup(groupPlayerProjectiles).clear();
+	//manager.getGroup(groupEnemyProjectiles).clear();
+	//manager.getGroup(groupWeapons).clear();
+	for (auto& e : enemies)
+		e->destroy();
+	for (auto& ep : EnemyProjectiles)
+		ep->destroy();
+	for (auto &pp : PlayerProjectiles)
+		pp->destroy();
+}
+
+void Game::resetGame()
+{
+	//LoadAssets(); //also map gets created
+	//manager.refresh();
+	//manager.update();
+
+	//Label Init
+	///SDL_Color white = { 255,255,255,255 };
+	///label.addComponent<UILabel>(10, 10, "Hello", "courier", white);
+	//
+	//
+
+	killEnemies();
+
+	manager.refresh();
+	manager.update();
+}
+
+void Game::reInit()
+{
+	WeaponsInit();
+
+	playerInit();
+
+	InitLvl1(3);
+
+	BossInit(500.0f, 70.0f, "BossShip");
+}
+
+bool Game::isPlayerActive()
+{
+	for (auto& player : manager.getGroup(Game::groupPlayers))
+	{
+		//make sure that there are only one player at a time in groupPlayes
+		return player->isActive();
+	}
+	
 }
 

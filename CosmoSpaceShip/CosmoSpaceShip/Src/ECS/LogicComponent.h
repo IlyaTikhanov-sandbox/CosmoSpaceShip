@@ -5,7 +5,7 @@
 
 enum LogicType
 {
-	None,
+	LogicNone,
 	FollowPath,  //follow the path of points in the pointStack
 	EasyLogic,   //Go from the left to the right
 	BossLogic
@@ -14,7 +14,7 @@ enum LogicType
 class LogicComponent : public Component
 {
 public:
-	LogicComponent(LogicType logic = LogicType::None)
+	LogicComponent(LogicType logic = LogicType::LogicNone)
 	{
 		currentLogic = logic;
 	}
@@ -77,5 +77,5 @@ private:
 	bool busy = false;
 	bool goLeft = false;
 
-	LogicType currentLogic = LogicType::None;
+	LogicType currentLogic = LogicType::LogicNone;
 };

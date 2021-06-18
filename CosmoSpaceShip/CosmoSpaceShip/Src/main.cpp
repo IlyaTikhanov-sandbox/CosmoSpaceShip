@@ -16,6 +16,68 @@ int main(int argc, char *argv[])
 	game = new Game();
 	game->init("GameWindow", WINDOW_WIDTH - 32 * MAP_TILE_SCALE * 2, WINDOW_HEIGHT - 32 * MAP_TILE_SCALE * 2, false);
 
+	if (game->currentStage == StageMenu)
+	{
+		game->prepareGameMenu();
+
+		while (!game->isGameMenuGameClosed() && game->running())
+		{
+			frameStart = SDL_GetTicks();
+
+			game->handleGameMenu();
+
+			game->updateGameMenu();
+
+			game->renderGameMenu();
+
+			frameTime = SDL_GetTicks() - frameStart;
+
+			if (game->currentStage != LevelStage::StageMenu)
+			{
+				if (game->isNewGame())
+				{
+					game->reInit();
+					game->newGameOff();
+				}
+				
+				while (game->running() && game->currentStage != LevelStage::StageMenu)
+				{
+					//Handling of 1 Frame
+
+					frameStart = SDL_GetTicks();
+
+					game->handleEvents();
+
+					if (Game::isRunning && game->currentStage != LevelStage::StageMenu)
+					{
+						game->update();
+					}
+					if (Game::isRunning && game->currentStage != LevelStage::StageMenu)
+						game->render();
+
+					frameTime = SDL_GetTicks() - frameStart;
+
+					//Stitck to our FPS
+					if (frameDelay > frameTime)
+					{
+						SDL_Delay(frameDelay - frameTime);
+					}
+
+					//if (!game->isPlayerActive())
+					//{
+					//	break;
+					//}
+				}
+			}
+
+			//Stitck to our FPS
+			if (frameDelay > frameTime)
+			{
+				SDL_Delay(frameDelay - frameTime);
+			}
+		}
+	}
+	/*
 	while (game->running())
 	{
 		//Handling of 1 Frame
@@ -44,6 +106,7 @@ int main(int argc, char *argv[])
 		}
 
 	}
+	*/
 
 	game->clean();
 	std::cout << "Game Cleaned" << std::endl;

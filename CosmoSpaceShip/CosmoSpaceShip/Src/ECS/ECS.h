@@ -70,6 +70,7 @@ public:
 	}
 	bool isActive() { return active; }
 	void destroy() { active = false; }
+	void setActive() { active = true; }
 
 	bool hasGroup(Group mGroup)
 	{
