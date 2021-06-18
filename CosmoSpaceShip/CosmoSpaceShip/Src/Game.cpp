@@ -393,6 +393,22 @@ void Game::clean()
 	SDL_Quit();
 }
 
+void Game::ChangeLevel()
+{
+	int num = currentStage;
+	++num;
+	currentStage = static_cast<LevelStage>(num);
+	if (currentStage > LevelStage::StageBoss)
+	{
+		currentStage = LevelStage::StageMenu;
+		for (auto& player : manager.getGroup(groupPlayers))
+		{
+			player->destroy();
+		}
+		new_game = true;
+	}
+}
+
 void Game::CreateMenu()
 {
 	m_gameMenu = new Menu();
@@ -752,7 +768,7 @@ void Game::BossInit(float xpos, float ypos, const char * texture)
 	boss.addComponent<SpriteComponent>(texture, false,assets->GetTextureWidth(texture));
 	boss.addComponent<FigthComponent>(assets, boss_weapon, Game::groupLabels::groupEnemyProjectiles);
 	boss.addComponent<ColliderComponent>("Boss");
-	boss.addComponent<HealthComponent>(500);
+	boss.addComponent<HealthComponent>(400);
 	boss.addComponent<LogicComponent>(LogicType::BossLogic);
 	
 }
