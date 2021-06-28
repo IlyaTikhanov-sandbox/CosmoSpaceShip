@@ -63,6 +63,91 @@ void KeyboardController::update()
 		sprite->Play("Idle");
 	}
 	*/
+
+	/*
+	if (Game::currentStage != LevelStage::StageMenu)
+	{
+		if (Game::event.type == SDL_KEYDOWN)
+		{
+			if (Game::event.key.keysym.sym == SDLK_UP)
+			{
+				fighting->Attack(transform->position, Vector2D(0, -1), SoundHandler::soundUpAttack);
+			}	 
+			if (Game::event.key.keysym.sym == SDLK_w)
+			{
+				transform->velocity.y = -1.65f;
+			}	 
+			if (Game::event.key.keysym.sym == SDLK_a)
+			{
+				transform->velocity.x = -1.65f;
+				transform->direction.x = -1;
+			}	 
+			if (Game::event.key.keysym.sym == SDLK_d)
+			{
+				transform->velocity.x = 1.65f;
+				transform->direction.x = 1;
+			}
+			if (Game::event.key.keysym.sym == SDLK_s)
+			{
+				transform->velocity.y = 1.65f;
+			}
+			if (Game::event.key.keysym.sym == SDLK_p)
+			{
+				Game::pause = true;
+			}	 
+			if (Game::event.key.keysym.sym == SDLK_SPACE)
+			{
+				transform->Leap(100);
+			} 
+		}
+		if (Game::event.type == SDL_KEYUP)
+		{
+			if (Game::event.key.keysym.sym == SDLK_w)
+			{
+				if (transform->velocity.y < 0)
+				{
+					transform->velocity.y = 0;
+				}
+				sprite->Play(Anims::Idle);
+			}
+			if (Game::event.key.keysym.sym == SDLK_a)
+			{
+				if (transform->velocity.x < 0)
+				{
+					transform->velocity.x = 0;
+					transform->direction.x = -1;
+				}
+				sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
+				sprite->Play(Anims::Idle);
+			}
+			if (Game::event.key.keysym.sym == SDLK_d)
+			{
+				if (transform->velocity.x > 0)
+				{
+					transform->velocity.x = 0;
+					transform->direction.x = 0;
+				}
+				sprite->spriteFlip = SDL_FLIP_NONE;
+				sprite->Play(Anims::Idle);
+			}
+			if (Game::event.key.keysym.sym == SDLK_s)
+			{
+				if (transform->velocity.y > 0)
+				{
+					transform->velocity.y = 0;
+				}
+				sprite->Play(Anims::Idle);
+			}
+			if (Game::event.key.keysym.sym == SDLK_ESCAPE)
+			{
+				Game::currentStage = LevelStage::StageMenu;
+				Game::m_gameMenu->resetCurrentButton();
+			}
+				
+		}
+	}
+	*/
+	
 	if (Game::currentStage != LevelStage::StageMenu)
 	{
 		if (Game::event.type == SDL_KEYDOWN)
@@ -116,22 +201,36 @@ void KeyboardController::update()
 			case SDLK_q:
 				break;
 			case SDLK_w:
-				transform->velocity.y = 0;
-				sprite->Play(Anims::Idle);
+				if (transform->velocity.y < 0)
+				{
+					transform->velocity.y = 0;
+					sprite->Play(Anims::Idle);
+				}
 				break;
 			case SDLK_a:
-				transform->velocity.x = 0;
-				sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
-				sprite->Play(Anims::Idle);
+				if (transform->velocity.x < 0)
+				{
+					transform->velocity.x = 0;
+					transform->direction.x = -1;
+					sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
+					sprite->Play(Anims::Idle);
+				}
 				break;
 			case SDLK_d:
-				transform->velocity.x = 0;
-				sprite->spriteFlip = SDL_FLIP_NONE;
-				sprite->Play(Anims::Idle);
+				if (transform->velocity.x > 0)
+				{
+					transform->velocity.x = 0;
+					transform->direction.x = 0;
+					sprite->spriteFlip = SDL_FLIP_NONE;
+					sprite->Play(Anims::Idle);
+				}
 				break;
 			case SDLK_s:
-				transform->velocity.y = 0;
-				sprite->Play(Anims::Idle);
+				if (transform->velocity.y > 0)
+				{
+					transform->velocity.y = 0;
+					sprite->Play(Anims::Idle);
+				}
 				break;
 			case SDLK_ESCAPE:
 				Game::currentStage = LevelStage::StageMenu;

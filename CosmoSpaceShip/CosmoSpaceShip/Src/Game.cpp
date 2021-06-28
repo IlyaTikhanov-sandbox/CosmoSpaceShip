@@ -140,9 +140,7 @@ void Game::handleEvents()
 			new_game = true;
 		}
 	}
-	
 
-	
 	if (AllEnemiesAreDead())
 	{
 		++lvl_change_timer;
@@ -156,13 +154,16 @@ void Game::handleEvents()
 
 	if (currentStage == LevelStage::StageBoss)
 	{
-		enemies.clear();
-		enemies = manager.getGroup(Game::groupBoss);
-		for (auto& e : enemies)
+		if (!(enemies[0]->hasGroup(Game::groupBoss)))
 		{
-			e->addGroup(Game::gpoupEnemies);
+			enemies.clear();
+			enemies = manager.getGroup(Game::groupBoss);
+			for (auto& e : enemies)
+			{
+				e->addGroup(Game::gpoupEnemies);
+			}
+			std::cout << "Added Boss to enemies" << std::endl;
 		}
-		std::cout << "Added Boss to enemies" << std::endl;
 	}
 
 	sounder->handleEvents();
@@ -327,8 +328,6 @@ void Game::update()
 			}
 		}
 	}
-
-
 
 	//Enemy attack
 	
@@ -553,7 +552,7 @@ void Game::handleGameMenu()
 		}
 	}
 
-	std::cout << "Current Button is : " << m_gameMenu->getCurrentButton() << std::endl;
+	//std::cout << "Current Button is : " << m_gameMenu->getCurrentButton() << std::endl;
 }
 
 void Game::activateMenuButton(int currentButton)
@@ -561,12 +560,12 @@ void Game::activateMenuButton(int currentButton)
 	switch (currentButton)
 	{
 	case MenuButtons::Play:
-		std::cout << "Play button was hit!" << std::endl;
+		//std::cout << "Play button was hit!" << std::endl;
 		m_gameMenu->changeMenuStatus(MenuStatus::Finished);
 		currentStage = LevelStage::StageRegular;
 		break;
 	case MenuButtons::Exit:
-		std::cout << "Exit button was hit!" << std::endl;
+		//std::cout << "Exit button was hit!" << std::endl;
 		m_gameMenu->changeMenuStatus(MenuStatus::GameClosed);
 		Game::isRunning = false;
 		break;
