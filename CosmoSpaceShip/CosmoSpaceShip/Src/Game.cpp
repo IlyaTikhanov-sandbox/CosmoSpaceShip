@@ -23,7 +23,8 @@ Manager manager;
 SDL_Renderer * Game::renderer = nullptr;
 SDL_Event Game::event;
 
-SDL_Rect Game::camera = {32 * MAP_TILE_SCALE,32 * MAP_TILE_SCALE, WINDOW_WIDTH - (32 * MAP_TILE_SCALE) * 2, WINDOW_HEIGHT - (32 * MAP_TILE_SCALE) * 2};
+//SDL_Rect Game::camera = {32 * MAP_TILE_SCALE,32 * MAP_TILE_SCALE, WINDOW_WIDTH - (32 * MAP_TILE_SCALE) * 2, WINDOW_HEIGHT - (32 * MAP_TILE_SCALE) * 2};
+SDL_Rect Game::camera = {32 * MAP_TILE_SCALE,32 * MAP_TILE_SCALE, PlAY_HD_WIDTH, PLAY_HD_HEIGHT};
 
 AssetManager* Game::assets = new AssetManager(&manager);
 Menu* Game::m_gameMenu = nullptr;
@@ -32,6 +33,9 @@ Menu* Game::m_gameMenu = nullptr;
 
 bool Game::switch_on = true;
 LevelStage Game::currentStage = LevelStage::StageMenu;
+
+int Game::actualPlayWidth  = defaultPlayWidth;
+int Game::actualPlayHeight = defaultPlayHeight;
 
 
 
@@ -52,6 +56,8 @@ Game::Game()
 	currentStage      = StageMenu;
 	gameMenuCooldown  = gameMenuDelay;
 	gameMenuCooldown2 = gameMenuDelay;
+
+	m_resolutionSettings = new ResolutionSettings();
 }
 
 Game::~Game()
@@ -77,6 +83,7 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 		if (window)
 		{
 			std::cout << "Window Created..." << std::endl;
+			std::cout << "Window Width = " << WINDOW_WIDTH - (32 * MAP_TILE_SCALE) * 2 << " Window Height = " << WINDOW_HEIGHT - (32 * MAP_TILE_SCALE) * 2 << " | Player Scale = " << PLAYER_SCALE << std::endl;
 		}
 		renderer = SDL_CreateRenderer(window, -1, 0);
 		if (renderer)
@@ -173,7 +180,7 @@ void Game::handleEvents()
 	switch (event.type)
 	{
 	case SDL_QUIT :
-	//	isRunning = false;
+	    isRunning = false;
 		break;
 	default:
 		break;
@@ -419,6 +426,10 @@ void Game::prepareGameMenu()
 	playLabel.addComponent<UILabel>(m_playWidth / 2 - 48, m_playHeight / 2 - 200,      "play", "courier", white);
 	exitLabel.addComponent<UILabel>(m_playWidth / 2 - 48, m_playHeight / 2 - 200 + 48, "exit", "courier", white);
 	//playLabel.addComponent<UILabel>(m_gameMenu->getLabelbyKey("play")); TBD: find out why it is not working
+
+	//m_resolutionSettings->changeResolution(1920, 1080);
+	m_resolutionSettings->changeResolution(1152,896);
+	m_resolutionSettings->printResolutionInfo();
 }
 
 void Game::updateGameMenu()
@@ -605,7 +616,8 @@ void Game::LoadAssets()
 	assets->AddFont("courier", "assets/cour.ttf", 48);
 
 	map = new Map("space", MAP_TILE_SCALE, 32);
-	map->LoadMap("assets/space_map.map", WIDTH_IN_TILES, HEIGHT_IN_TILES,walkinMap);
+	//map->LoadMap("assets/space_map_HD.map", WIDTH_IN_TILES, HEIGHT_IN_TILES, walkinMap);
+	map->LoadMap("assets/space_map_HD.map", 32, 18, walkinMap);
 }
 
 void Game::InitWeapon(WeaponParams * weapon,  SoundHandler * sounder)
@@ -748,8 +760,8 @@ void Game::playerInit()
 
 void Game::enemyInit(float xpos, float ypos, std::string texture)
 {
-	auto& enemy(manager.addEntity());                 //scale
-	enemy.addGroup(gpoupEnemies);
+	auto& enemy(manager.addEntity());                 
+	enemy.addGroup(gpoupEnemies);                     //scale  speed
 	enemy.addComponent<TransformComponent>(xpos, ypos,    3,    6);
 	enemy.addComponent<SpriteComponent>(texture, true);
 	enemy.addComponent<FigthComponent>(assets, enemy_weapon, Game::groupLabels::groupEnemyProjectiles);
