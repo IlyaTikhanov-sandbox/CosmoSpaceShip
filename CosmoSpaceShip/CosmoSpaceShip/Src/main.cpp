@@ -14,7 +14,8 @@ int main(int argc, char *argv[])
 	int frameTime;
 
 	game = new Game();
-	game->init("GameWindow", WINDOW_WIDTH - 32 * MAP_TILE_SCALE * 2, WINDOW_HEIGHT - 32 * MAP_TILE_SCALE * 2, false);
+	//game->init("CosmoSpaceShip", WINDOW_WIDTH - 32 * MAP_TILE_SCALE * 2, WINDOW_HEIGHT - 32 * MAP_TILE_SCALE * 2, false);
+	game->init("CosmoSpaceShip", PlAY_HD_WIDTH, PLAY_HD_HEIGHT, false);
 
 	if (game->currentStage == StageMenu)
 	{

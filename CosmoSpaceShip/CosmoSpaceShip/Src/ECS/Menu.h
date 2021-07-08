@@ -32,6 +32,7 @@ public:
 		m_currentButton = 0;
 		m_contentMenu.emplace("play",play);
 	}
+
 	~Menu();
 
 	UILabel getLabelbyKey(std::string key) { return m_contentMenu[key]; }
@@ -63,6 +64,4 @@ private:
 
 	int m_currentButton = -1;
 	int m_sizeMenuButtons = 2;
-
-
 };
