@@ -66,15 +66,6 @@ struct WeaponParams
 	SoundHandler *pSounder;
 };
 
-
-
-enum LevelStage : int
-{
-	StageMenu,
-	StageRegular,
-	StageBoss
-};
-
 struct ResolutionSettings
 {
 	const int Base = backgroundTileSize;
