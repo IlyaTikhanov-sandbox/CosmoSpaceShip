@@ -5,7 +5,7 @@
 class HealthComponent : public Component
 {
 public:
-	HealthComponent(int health = 100):hp(health) {}
+	HealthComponent(int health = 100):hp(health),maxHP(health) {}
 	~HealthComponent() {}
 
 	void init() override
@@ -58,9 +58,11 @@ public:
 			wasHit--;
 	}
 	int WasHit() { return wasHit; }
+	int getMaxHP()  { return maxHP; }
 
 private:
 	int hp = 100;
+	int maxHP = 0;
 	int wasHit = 0;
 	bool dead = false;
 	SpriteComponent* sprite;

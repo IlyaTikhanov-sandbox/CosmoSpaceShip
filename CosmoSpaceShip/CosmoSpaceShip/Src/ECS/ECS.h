@@ -57,6 +57,9 @@ private:
 	ComponentBitSet componentBitSet;
 	GroupBitSet groupBitset;
 
+protected:
+	Manager& getManager() { return manager; }
+
 public:
 	Entity(Manager& mManager) : manager(mManager) {}
 
@@ -82,6 +85,8 @@ public:
 	{
 		groupBitset[mGroup] = false;
 	}
+	void changeGroupTo(Group group);
+	void addGroupOnly(Group group) { groupBitset[group] = true; }
 	template <typename T> 
 	bool hasComponent() const
 	{
@@ -148,6 +153,37 @@ public:
 			return !mEntity->isActive();
 		}),
 			std::end(entities));
+	}
+
+	int getNotActiveEntitiesNumber(Group group)
+	{
+		int num = 0;
+
+		auto& v(groupedEntities[group]);
+		num = std::count_if
+		(
+			std::begin(v), std::end(v),
+				[](Entity* mEntity)
+				{
+					return !mEntity->isActive();
+				}
+		);
+
+		return num;
+	}
+
+	std::vector<const Entity*> getNotActiveEntities(Group group)
+	{
+		std::vector<const Entity*> deadEntities;
+		
+		//add check on group existance
+		for (auto& entity : groupedEntities[group])
+		{
+			if (!entity->isActive())
+				deadEntities.emplace_back(entity);
+		}
+
+		return deadEntities;
 	}
 
 	void AddToGroup(Entity * mEntity, Group mGroup)
