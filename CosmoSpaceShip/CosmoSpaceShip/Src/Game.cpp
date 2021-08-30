@@ -49,6 +49,7 @@ auto& label(manager.addEntity());
 //MenuLabels
 auto& playLabel(manager.addEntity());
 auto& exitLabel(manager.addEntity());
+auto& score(manager.addEntity());
 
 
 Game::Game()
@@ -103,18 +104,10 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 		std::cout << "Error Initializing SDL TTF" << std::endl;
 	}
 
-	//currentStage = LevelStage::StageRegular; Uncomment to skip MENU
-
 	sounder = new SoundHandler();
 	sounder->init();
 
 	LoadAssets(); //also map gets created
-
-
-	//Label Init
-	///SDL_Color white = { 255,255,255,255 };
-	///label.addComponent<UILabel>(10, 10, "Hello", "courier", white);
-	//
 	
 	WeaponsInit();
 
@@ -130,7 +123,7 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 auto& tiles(manager.getGroup(Game::groupMap));
 auto& players(manager.getGroup(Game::groupPlayers));
 auto& colliders(manager.getGroup(Game::groupColliders));
-auto& enemies(manager.getGroup(Game::gpoupEnemies));
+auto& enemies(manager.getGroup(Game::groupEnemies));
 //auto& bosses(manager.getGroup(Game::groupBoss));
 auto& PlayerProjectiles(manager.getGroup(Game::groupPlayerProjectiles));
 auto& EnemyProjectiles(manager.getGroup(Game::groupEnemyProjectiles));
@@ -145,31 +138,7 @@ void Game::handleEvents()
 			resetGame();
 			switchToGameMenu();
 			new_game = true;
-		}
-	}
-
-	if (AllEnemiesAreDead())
-	{
-		++lvl_change_timer;
-	}
-
-	if (lvl_change_timer == LVL_CHANGE)
-	{
-		lvl_change_timer = 0;
-		ChangeLevel();
-	}
-
-	if (currentStage == LevelStage::StageBoss)
-	{
-		if (!(enemies[0]->hasGroup(Game::groupBoss)))
-		{
-			enemies.clear();
-			enemies = manager.getGroup(Game::groupBoss);
-			for (auto& e : enemies)
-			{
-				e->addGroup(Game::gpoupEnemies);
-			}
-			std::cout << "Added Boss to enemies" << std::endl;
+			return;
 		}
 	}
 
@@ -180,10 +149,43 @@ void Game::handleEvents()
 	switch (event.type)
 	{
 	case SDL_QUIT :
-	    isRunning = false;
+		isRunning = false;
 		break;
 	default:
 		break;
+	}
+
+	if (AllEnemiesAreDead())
+	{
+		changeLevelRequested = true;
+	}
+
+	if (lvl_change_timer == LVL_CHANGE)
+	{
+		lvl_change_timer = 0;
+		ChangeLevel();
+		changeLevelRequested = false;
+	}
+
+	if (changeLevelRequested)
+	{
+		++lvl_change_timer;
+	}
+
+	if (currentStage == LevelStage::StageBoss && changeLevelRequested == false)
+	{
+		if (enemies.size() == 0)
+		{
+			enemies.clear();
+
+			enemies = manager.getGroup(Game::groupBoss);
+			for (auto& e : enemies)
+			{
+				//e->changeGroupTo(Game::groupEnemies);
+				e->addGroupOnly(Game::groupEnemies);
+			}
+			std::cout << "Added Boss to enemies" << std::endl;
+		}
 	}
 }
 
@@ -207,7 +209,7 @@ void Game::TimingHandle()
 
 void Game::update()
 {
-	//TimingHandle();
+	m_scoreCounter.growScore(currentStage);
 
 	//Player position from previous frame
 	Vector2D prevPlayerPos;
@@ -215,25 +217,37 @@ void Game::update()
 	{
 		prevPlayerPos = player->getComponent<TransformComponent>().position;
 	}
-	//Vector2D 
-	//std::cout << "Player width: " << player.getComponent<TransformComponent>().width << std::endl;
+
 	for (auto& pr : EnemyProjectiles)
 	{
 		pr->getComponent<TransformComponent>().updPrevPostition();
 	}
 
-	// Mechanizm to stream some info to the screen
-	///std::stringstream ss;
-	///ss << "Player" << "(" << prevPlayerPos.x << " , " << prevPlayerPos.y << ")";
-	///label.getComponent<UILabel>().SetLabelText(ss.str(), "courier");
-	//
+	SDL_Color white = { 255,255,255,255 };
+	SDL_Color red = { 255,0,0,255 };
 
+	//Caught dead enemies and calculate score before dead enemy will be removed
+	if (manager.getNotActiveEntitiesNumber(groupEnemies) != 0)
+	{
+		m_scoreCounter.increaseScore(m_scoreCounter.calculateBonus(manager.getNotActiveEntities(groupEnemies)));
+	}
 
 	//update all components to the current frame state
 	manager.refresh();
 	manager.update();
 
-#ifndef FRIENDLY
+	std::stringstream ss;
+	ss << m_scoreCounter.getScoreStr();
+	if (m_scoreCounter.getTimer() > 0)
+	{
+		score.getComponent<UILabel>().SetLabelText_Color(ss.str(), "courier", red);
+	}
+	else
+	{
+		score.getComponent<UILabel>().SetLabelText_Color(ss.str(), "courier", white);
+	}
+
+
 	//Hitting enemy handling
 	for (auto& pr : PlayerProjectiles)
 	{
@@ -241,9 +255,9 @@ void Game::update()
 		for (auto& e : enemies)
 		{
 			SDL_Rect enCol = e->getComponent<ColliderComponent>().collider;
-			if (Collision::AABB(prCol, enCol))
+			if (Collision::AABB(prCol, enCol)) //player hit enemy
 			{
-				std::cout << "player hit some enemy" << std::endl;
+				//std::cout << "player hit some enemy" << std::endl;
 				e->getComponent<HealthComponent>().gotHit();
 				e->getComponent<HealthComponent>().update();
 				e->getComponent<HealthComponent>().decreaseHP(pr->getComponent<ProjectileComponent>().getDamage());
@@ -256,7 +270,8 @@ void Game::update()
 			}
 		}
 	}
-
+#ifndef FRIENDLY
+	//Enemy hit player detection
 	for (auto& pr : EnemyProjectiles)
 	{
 		SDL_Rect prCol = pr->getComponent<ColliderComponent>().collider;
@@ -268,9 +283,6 @@ void Game::update()
 		
 		if (Collision::AABB(prCol, plCol))
 		{
-			std::cout << "enemy hit player" << std::endl;
-			//player.getComponent<HealthComponent>().gotHit();
-			//player.getComponent<HealthComponent>().update();
 			for (auto& player : manager.getGroup(Game::groupPlayers))
 			{
 				player->getComponent<HealthComponent>().decreaseHP(pr->getComponent<ProjectileComponent>().getDamage());
@@ -343,7 +355,6 @@ void Game::update()
 		e->getComponent<TransformComponent>().updPrevPostition();
 		if(isEntityOnDisplay(e))
 		{
-			//e->getComponent<TransformComponent>().getCentralPos()
 			e->getComponent<FigthComponent>().Attack(e->getComponent<TransformComponent>().position, Vector2D(0, 1), SoundHandler::soundType::soundEnemyAttack);
 		}
 	}
@@ -388,12 +399,14 @@ void Game::render()
 	
 
 	label.draw();
+	score.draw();
 	
 	SDL_RenderPresent(renderer);
 }
 
 void Game::clean()
 {
+	m_scoreCounter.printScore();
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();
@@ -403,7 +416,9 @@ void Game::ChangeLevel()
 {
 	int num = currentStage;
 	++num;
+
 	currentStage = static_cast<LevelStage>(num);
+
 	if (currentStage > LevelStage::StageBoss)
 	{
 		currentStage = LevelStage::StageMenu;
@@ -413,6 +428,8 @@ void Game::ChangeLevel()
 		}
 		new_game = true;
 	}
+
+	m_scoreCounter.resetTimer();
 }
 
 void Game::CreateMenu()
@@ -425,6 +442,7 @@ void Game::prepareGameMenu()
 	SDL_Color white = { 255,255,255,255 };
 	playLabel.addComponent<UILabel>(m_playWidth / 2 - 48, m_playHeight / 2 - 200,      "play", "courier", white);
 	exitLabel.addComponent<UILabel>(m_playWidth / 2 - 48, m_playHeight / 2 - 200 + 48, "exit", "courier", white);
+	score.addComponent<UILabel>(0, m_playHeight - 50, "0","courier", white);
 	//playLabel.addComponent<UILabel>(m_gameMenu->getLabelbyKey("play")); TBD: find out why it is not working
 
 	//m_resolutionSettings->changeResolution(1920, 1080);
@@ -760,8 +778,8 @@ void Game::playerInit()
 
 void Game::enemyInit(float xpos, float ypos, std::string texture)
 {
-	auto& enemy(manager.addEntity());                 
-	enemy.addGroup(gpoupEnemies);                     //scale  speed
+	auto& enemy(manager.addEntity());                 //scale
+	enemy.addGroup(groupEnemies);
 	enemy.addComponent<TransformComponent>(xpos, ypos,    3,    6);
 	enemy.addComponent<SpriteComponent>(texture, true);
 	enemy.addComponent<FigthComponent>(assets, enemy_weapon, Game::groupLabels::groupEnemyProjectiles);
@@ -786,11 +804,6 @@ void Game::BossInit(float xpos, float ypos, const char * texture)
 
 std::string PickTexture(int rand_id)
 {
-	/*
-	"Enemy_ship_Grey" 
-	"Enemy_ship_Green"
-	"Enemy_ship_Red"
-	*/
 	switch (rand_id)
 	{
 	case 0:
@@ -834,12 +847,6 @@ void Game::InitLvl1(int Num_Enemies)
 
 void Game::killEnemies()
 {
-	//manager.getGroup(gpoupEnemies).clear();
-	//manager.getGroup(groupBoss).clear();
-	//manager.getGroup(gpoupWeapons).clear();
-	//manager.getGroup(groupPlayerProjectiles).clear();
-	//manager.getGroup(groupEnemyProjectiles).clear();
-	//manager.getGroup(groupWeapons).clear();
 	for (auto& e : enemies)
 		e->destroy();
 	for (auto& ep : EnemyProjectiles)
@@ -850,16 +857,6 @@ void Game::killEnemies()
 
 void Game::resetGame()
 {
-	//LoadAssets(); //also map gets created
-	//manager.refresh();
-	//manager.update();
-
-	//Label Init
-	///SDL_Color white = { 255,255,255,255 };
-	///label.addComponent<UILabel>(10, 10, "Hello", "courier", white);
-	//
-	//
-
 	killEnemies();
 
 	manager.refresh();
@@ -874,6 +871,8 @@ void Game::reInit()
 
 	InitLvl1(3);
 
+	m_scoreCounter.resetScore();
+
 	BossInit(500.0f, 70.0f, "BossShip");
 }
 
@@ -881,9 +880,35 @@ bool Game::isPlayerActive()
 {
 	for (auto& player : manager.getGroup(Game::groupPlayers))
 	{
-		//make sure that there are only one player at a time in groupPlayes
+		//TBD: make sure that there are only one player at a time in groupPlayes
 		return player->isActive();
 	}
-	
 }
 
+int Score::calculateBonus(std::vector<const Entity*> deadEntities)
+{
+	int bonus = 0;
+
+	for (const auto& entity : deadEntities)
+	{
+		bonus += entity->getComponent<HealthComponent>().getMaxHP();
+	}
+
+	return getTimer() > 0 ? bonus * 2 : bonus;
+}
+
+
+void Score::printScore()
+{
+	std::cout << "Your Score is:" << m_score << std::endl;
+}
+
+std::string Score::getScoreStr()
+{
+	return std::to_string(static_cast<int>(m_score));
+}
+
+void Score::printTimer()
+{
+	std::cout << bonusTimer << std::endl;
+}

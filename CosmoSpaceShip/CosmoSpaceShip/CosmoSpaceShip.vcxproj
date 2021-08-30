@@ -162,6 +162,7 @@
     <ClInclude Include="Src\ECS\LogicComponent.h" />
     <ClInclude Include="Src\ECS\Menu.h" />
     <ClInclude Include="Src\ECS\ProjectileComponent.h" />
+    <ClInclude Include="Src\ECS\ScoreComponent.h" />
     <ClInclude Include="Src\ECS\SpriteComponent.h" />
     <ClInclude Include="Src\ECS\TileComponent.h" />
     <ClInclude Include="Src\ECS\TimingComponent.h" />

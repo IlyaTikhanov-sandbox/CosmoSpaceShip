@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include "Sounds.h"
+#include <string>
 //#include "ECS/ECS.h"
 #include <map>
 #include <random>
@@ -65,6 +66,15 @@ struct WeaponParams
 	SoundHandler *pSounder;
 };
 
+
+
+enum LevelStage : int
+{
+	StageMenu,
+	StageRegular,
+	StageBoss
+};
+
 struct ResolutionSettings
 {
 	const int Base = backgroundTileSize;
@@ -112,6 +122,33 @@ struct ResolutionSettings
 		std::cout << "Screen/MediumShip Ratio Width = "  << widthInPixel  / mediumShipSide << std::endl;
 		std::cout << "Screen/MediumShip Ratio Height = " << heightInPixel / mediumShipSide << std::endl;
 	}
+};
+
+struct Score
+{
+public:
+	int calculateBonus(std::vector<const Entity*> deadEntities);
+
+	void increaseScore(int add) { m_score += add; }
+	void growScore(LevelStage level) 
+	{ 
+		//m_score += static_cast<int>(level) * 0.3;
+		if(bonusTimer > 0)
+			bonusTimer--;
+	}
+	void printScore();
+	void resetScore() { m_score = 0; bonusTimer = 550; }
+	
+	std::string getScoreStr();
+
+	void resetTimer() { bonusTimer = 550; }
+	int getTimer() { return bonusTimer; }
+	void printTimer();
+
+
+private:
+	long double m_score{ 0 };
+	int bonusTimer{ 550 };
 };
 
 
@@ -199,7 +236,7 @@ public:
 	{
 		groupMap,
 		groupPlayers,
-		gpoupEnemies,
+		groupEnemies,
 		groupBoss,
 		gpoupWeapons,
 		groupColliders,
@@ -223,6 +260,7 @@ private:
 	int cnt = 0;
 	SDL_Window *window;
 	int lvl_change_timer = 0;
+	bool changeLevelRequested = false;
 
 	bool new_game = false;
 	int gameMenuDelay = 10;
@@ -231,5 +269,7 @@ private:
 
 	int m_playWidth;
 	int m_playHeight;
+
+	Score m_scoreCounter;
 };
 
