@@ -446,7 +446,7 @@ void Game::prepareGameMenu()
 	//playLabel.addComponent<UILabel>(m_gameMenu->getLabelbyKey("play")); TBD: find out why it is not working
 
 	//m_resolutionSettings->changeResolution(1920, 1080);
-	m_resolutionSettings->changeResolution(1152,896);
+	//m_resolutionSettings->changeResolution(1152,896);
 	m_resolutionSettings->printResolutionInfo();
 }
 
