@@ -152,11 +152,13 @@ void KeyboardController::update()
 	{
 		if (Game::event.type == SDL_KEYDOWN)
 		{
+			if (Game::event.key.keysym.sym == SDLK_UP)
+			{
+				fighting->Attack(transform->position, Vector2D(0, -1), SoundHandler::soundUpAttack);
+			}
+
 			switch (Game::event.key.keysym.sym)
 			{
-			case SDLK_UP:
-				fighting->Attack(transform->position, Vector2D(0, -1), SoundHandler::soundUpAttack);
-				break;
 			case SDLK_w:
 				transform->velocity.y = -1.65f;
 				break;

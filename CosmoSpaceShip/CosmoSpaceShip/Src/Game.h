@@ -35,6 +35,13 @@ enum ProjectileType :int
 	Ricochet
 };
 
+enum LevelStage : int
+{
+	StageMenu,
+	StageRegular,
+	StageBoss
+};
+
 struct Attack
 {
 	int range;
@@ -68,6 +75,55 @@ enum LevelStage : int
 	StageBoss
 };
 
+struct ResolutionSettings
+{
+	const int Base = backgroundTileSize;
+
+	int widthInPixel  = defaultPlayWidth;
+	int heightInPixel = defaultPlayHeight;
+
+	int numTilesWidth  = defaultWidthInTiles;
+	int numTilesHeight = defaultHeightInTiles;
+
+	int mediumShipSide = widthInPixel / ScreenShipRatioW;
+	int ligthShipScale  = defaultPlayerScale / shipDelta;
+	int mediumShipScale = defaultPlayerScale;
+	int heavyShipScale  = defaultPlayerScale * shipDelta;
+
+
+	void changeResolution(int newWidth, int newHeight)
+	{
+		widthInPixel  = newWidth;
+		heightInPixel = newHeight;
+
+		numTilesWidth  = widthInPixel / Base;
+		numTilesHeight = heightInPixel / Base;
+
+		mediumShipSide  = widthInPixel / ScreenShipRatioW;
+		mediumShipScale = mediumShipSide / Base;
+
+		ligthShipScale  = mediumShipScale / shipDelta;
+		heavyShipScale  = mediumShipScale * shipDelta;
+
+		mediumShipSide = mediumShipScale * mediumShipSizeHard;
+	}
+
+	void printResolutionInfo()
+	{
+		std::cout << "Width = "  << widthInPixel  << std::endl;
+		std::cout << "Height = " << heightInPixel << std::endl;
+		std::cout << "Num Tiles in Width = "  << numTilesWidth  << std::endl;
+		std::cout << "Num Tiles in Height = " << numTilesHeight << std::endl;
+		std::cout << "Medium ship size width = " << mediumShipSide << std::endl;
+		std::cout << "Light ship scale " << ligthShipScale  << std::endl;
+		std::cout << "Medium ship scale "<< mediumShipScale << std::endl;
+		std::cout << "Heavy ship scale " << heavyShipScale  << std::endl;
+
+		std::cout << "Screen/MediumShip Ratio Width = "  << widthInPixel  / mediumShipSide << std::endl;
+		std::cout << "Screen/MediumShip Ratio Height = " << heightInPixel / mediumShipSide << std::endl;
+	}
+};
+
 struct Score
 {
 public:
@@ -94,6 +150,7 @@ private:
 	long double m_score{ 0 };
 	int bonusTimer{ 550 };
 };
+
 
 class Game
 {
@@ -144,6 +201,11 @@ public:
 	static bool switch_on;
 	static LevelStage currentStage;
 
+	//Resolution Parameters
+	ResolutionSettings* m_resolutionSettings;
+	static int actualPlayWidth;
+	static int actualPlayHeight;
+
 
 	WeaponParams PlayerWeaponParams;
 	WeaponParams EnemyWeaponParams;
@@ -168,7 +230,6 @@ public:
 	void killEnemies();
 	void resetGame();
 	void reInit();
-
 	bool isPlayerActive();
 
 	enum groupLabels : std::size_t

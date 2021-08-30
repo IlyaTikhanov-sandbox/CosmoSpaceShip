@@ -76,7 +76,7 @@ public:
 		position.y = y;
 		scale = scale_;
 	}
-	TransformComponent(float x, float y, int scale_,int speed_)
+	TransformComponent(float x, float y, int scale_,int speed_) // Usually use this one
 	{
 		startPosX = x;
 		startPosY = y;
