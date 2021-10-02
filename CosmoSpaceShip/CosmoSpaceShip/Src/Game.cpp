@@ -24,7 +24,7 @@ SDL_Renderer * Game::renderer = nullptr;
 SDL_Event Game::event;
 
 //SDL_Rect Game::camera = {32 * MAP_TILE_SCALE,32 * MAP_TILE_SCALE, WINDOW_WIDTH - (32 * MAP_TILE_SCALE) * 2, WINDOW_HEIGHT - (32 * MAP_TILE_SCALE) * 2};
-SDL_Rect Game::camera = {32 * MAP_TILE_SCALE,32 * MAP_TILE_SCALE, PlAY_HD_WIDTH, PLAY_HD_HEIGHT};
+SDL_Rect Game::camera = {0,0, PlAY_HD_WIDTH, PLAY_HD_HEIGHT};
 
 AssetManager* Game::assets = new AssetManager(&manager);
 Menu* Game::m_gameMenu = nullptr;
@@ -59,6 +59,9 @@ Game::Game()
 	gameMenuCooldown2 = gameMenuDelay;
 
 	m_resolutionSettings = new ResolutionSettings();
+
+	m_resolutionSettings->calculateResolution(1920, 1080);
+	m_resolutionSettings->printResolutionInfo();
 }
 
 Game::~Game()
@@ -115,7 +118,7 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 
 	InitLvl1(3);
 
-	BossInit(500.0f, 70.0f, "BossShip");
+	BossInit(Game::camera.w / 2 - (assets->GetTextureWidth("BossShip") * m_resolutionSettings->getHeavyShipScale() / 2), 5.0f, "BossShip");
 
 	CreateMenu();
 }
@@ -328,12 +331,12 @@ void Game::update()
 		}
 		for (auto& pr : EnemyProjectiles)
 		{
-			if (pr->getComponent<ProjectileComponent>().projType == ProjectileType::Ricochet)
+			if (pr->getComponent<ProjectileComponent>().projType == ProjectileType::Ricochet) //Ricochet Handling
 			{
 				SDL_Rect prCol = pr->getComponent<ColliderComponent>().collider;
 				if (Collision::AABB(prCol, cCol))
 				{
-					if (abs(pr->getComponent<TransformComponent>().position.y - 70.0f) < 50)
+					if (abs(pr->getComponent<TransformComponent>().position.y) < 50 || abs( (pr->getComponent<TransformComponent>().position.y) - Game::camera.h) < 50)
 					{
 						pr->getComponent<ProjectileComponent>().changeRicochetDirY();
 						pr->getComponent<ColliderComponent>().update();
@@ -444,10 +447,6 @@ void Game::prepareGameMenu()
 	exitLabel.addComponent<UILabel>(m_playWidth / 2 - 48, m_playHeight / 2 - 200 + 48, "exit", "courier", white);
 	score.addComponent<UILabel>(0, m_playHeight - 50, "0","courier", white);
 	//playLabel.addComponent<UILabel>(m_gameMenu->getLabelbyKey("play")); TBD: find out why it is not working
-
-	//m_resolutionSettings->changeResolution(1920, 1080);
-	//m_resolutionSettings->changeResolution(1152,896);
-	m_resolutionSettings->printResolutionInfo();
 }
 
 void Game::updateGameMenu()
@@ -614,6 +613,7 @@ void Game::drawBackground()
 void Game::LoadAssets()
 {
 	assets->AddTexture("space", "assets/space_map_tileset.png");
+	assets->AddTexture("space_16_9", "assets/space_16_9.png");
 
 	assets->AddTexture("Ship", "assets/ship_anims.png");
 	assets->AddTexture("Player_Attack", "assets/player_proj_8.png", 8);
@@ -633,9 +633,14 @@ void Game::LoadAssets()
 
 	assets->AddFont("courier", "assets/cour.ttf", 48);
 
-	map = new Map("space", MAP_TILE_SCALE, 32);
+	map = new Map("space_16_9", 1, m_resolutionSettings->getBaseTileSize());
 	//map->LoadMap("assets/space_map_HD.map", WIDTH_IN_TILES, HEIGHT_IN_TILES, walkinMap);
-	map->LoadMap("assets/space_map_HD.map", 32, 18, walkinMap);
+	map->LoadMap("assets/space_map_HD.map",
+		m_resolutionSettings->getWidthInTiles(),
+		m_resolutionSettings->getHeightInTiles(),
+		m_resolutionSettings->getWindowWidth(),
+		m_resolutionSettings->getWindowHeight()
+	);
 }
 
 void Game::InitWeapon(WeaponParams * weapon,  SoundHandler * sounder)
@@ -724,7 +729,7 @@ void Game::WeaponsInit()
 
 	Attack BossRicochetAttack;
 
-	BossRicochetAttack.range = 1000;
+	BossRicochetAttack.range = 600;
 	BossRicochetAttack.speed = 3;
 	BossRicochetAttack.scale = 2;
 	BossRicochetAttack.damage = 100;
@@ -764,7 +769,7 @@ void Game::playerInit()
 	for (auto& player : manager.getGroup(Game::groupPlayers))
 	{
 		//player.addGroup(groupPlayers);
-		player->addComponent<TransformComponent>(610.0f, 815.0f, PLAYER_SCALE, 7);
+		player->addComponent<TransformComponent>(610.0f, 815.0f, m_resolutionSettings->getMediumShipScale() , 8);
 		player->addComponent<SpriteComponent>("Ship", true);
 		player->addComponent<TimingComponent>();
 		player->addComponent<FigthComponent>(assets, player_weapon, Game::groupLabels::groupPlayerProjectiles);
@@ -780,7 +785,7 @@ void Game::enemyInit(float xpos, float ypos, std::string texture)
 {
 	auto& enemy(manager.addEntity());                 //scale
 	enemy.addGroup(groupEnemies);
-	enemy.addComponent<TransformComponent>(xpos, ypos,    3,    6);
+	enemy.addComponent<TransformComponent>(xpos, ypos, m_resolutionSettings->getMediumShipScale(),    7);
 	enemy.addComponent<SpriteComponent>(texture, true);
 	enemy.addComponent<FigthComponent>(assets, enemy_weapon, Game::groupLabels::groupEnemyProjectiles);
 	enemy.addComponent<ColliderComponent>("enemy");
@@ -793,7 +798,7 @@ void Game::BossInit(float xpos, float ypos, const char * texture)
 {
 	auto& boss(manager.addEntity());
 	boss.addGroup(groupBoss);
-	boss.addComponent<TransformComponent>(xpos, ypos, assets->GetTextureWidth(texture), assets->GetTextureWidth(texture), 5, 1);
+	boss.addComponent<TransformComponent>(xpos, ypos, assets->GetTextureWidth(texture), assets->GetTextureWidth(texture), m_resolutionSettings->getHeavyShipScale() , 1);
 	boss.addComponent<SpriteComponent>(texture, false,assets->GetTextureWidth(texture));
 	boss.addComponent<FigthComponent>(assets, boss_weapon, Game::groupLabels::groupEnemyProjectiles);
 	boss.addComponent<ColliderComponent>("Boss");
@@ -873,7 +878,7 @@ void Game::reInit()
 
 	m_scoreCounter.resetScore();
 
-	BossInit(500.0f, 70.0f, "BossShip");
+	BossInit(Game::camera.w / 2 - (assets->GetTextureWidth("BossShip") * m_resolutionSettings->getHeavyShipScale() / 2), 5.0f,"BossShip");
 }
 
 bool Game::isPlayerActive()

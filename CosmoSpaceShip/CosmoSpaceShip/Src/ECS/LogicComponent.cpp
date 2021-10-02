@@ -35,7 +35,7 @@ void LogicComponent::GoLeftRight()
 	{
 		busy = true;
 		idle = false;
-		Vector2D destPoint = Vector2D(70.0f, 70.0f);
+		Vector2D destPoint = Vector2D(0.0f, 70.0f);
 		if (NOTAlmostEquals(OwnTransform->position, destPoint))// (!~=)
 		{
 			GoToThePoint(destPoint);
@@ -50,7 +50,7 @@ void LogicComponent::GoLeftRight()
 	{
 		busy = true;
 		idle = false;
-		Vector2D destPoint = Vector2D(1115.0f - OwnTransform->scaledWidth, 70.0f);
+		Vector2D destPoint = Vector2D(Game::camera.w - OwnTransform->scaledWidth, 70.0f);
 		if (NOTAlmostEquals(OwnTransform->position, destPoint))// (!~=)
 		{
 			GoToThePoint(destPoint);

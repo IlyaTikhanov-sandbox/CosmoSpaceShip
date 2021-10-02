@@ -177,7 +177,7 @@ void KeyboardController::update()
 				Game::pause = true;
 				break;
 			case SDLK_SPACE:
-				transform->Leap(100);
+				transform->Leap(150);
 				break;
 				//case SDLK_o:
 				//	Game::switch_on = false;

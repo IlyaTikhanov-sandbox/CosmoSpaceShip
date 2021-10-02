@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Components.h"
-#include "Constants.h"
+#include "../Game.h"
 #include "../Vector2D.h"
 
 class TransformComponent : public Component
@@ -134,12 +134,12 @@ public:
 		int XNextPosition = position.x + direction.x * length;
 		if (XNextPosition < 0)
 		{
-			XNextPosition = 68;
+			XNextPosition = 1;
 		}
-		else if (XNextPosition + 32 * PLAYER_SCALE * 2 > WINDOW_WIDTH)
+		else if (XNextPosition + 32 * scale * 2 > Game::camera.w)
 		{
 			std::cout << "RIGHT LEAP PREVENT OUT OF BORDER!!" << std::endl;
-			XNextPosition = PLAY_WIDTH - 32 * PLAYER_SCALE - 10;
+			XNextPosition = Game::camera.w - 32 * scale - 10;
 		}
 		position.x = XNextPosition;
 	}

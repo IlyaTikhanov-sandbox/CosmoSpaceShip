@@ -137,5 +137,11 @@
     <ClInclude Include="Src\ECS\ScoreComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\ResolutionSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

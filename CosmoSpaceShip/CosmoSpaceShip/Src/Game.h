@@ -11,6 +11,7 @@
 //#include "ECS/ECS.h"
 #include <map>
 #include <random>
+#include "ResolutionSettings.h"
 
 #define FILE_PATH "assets/theme.wav"
 #define LVL_CHANGE 120
@@ -64,55 +65,6 @@ struct WeaponParams
 	int Attack_num;
 	std::map<AttackType, Attack> attacks;
 	SoundHandler *pSounder;
-};
-
-struct ResolutionSettings
-{
-	const int Base = backgroundTileSize;
-
-	int widthInPixel  = defaultPlayWidth;
-	int heightInPixel = defaultPlayHeight;
-
-	int numTilesWidth  = defaultWidthInTiles;
-	int numTilesHeight = defaultHeightInTiles;
-
-	int mediumShipSide = widthInPixel / ScreenShipRatioW;
-	int ligthShipScale  = defaultPlayerScale / shipDelta;
-	int mediumShipScale = defaultPlayerScale;
-	int heavyShipScale  = defaultPlayerScale * shipDelta;
-
-
-	void changeResolution(int newWidth, int newHeight)
-	{
-		widthInPixel  = newWidth;
-		heightInPixel = newHeight;
-
-		numTilesWidth  = widthInPixel / Base;
-		numTilesHeight = heightInPixel / Base;
-
-		mediumShipSide  = widthInPixel / ScreenShipRatioW;
-		mediumShipScale = mediumShipSide / Base;
-
-		ligthShipScale  = mediumShipScale / shipDelta;
-		heavyShipScale  = mediumShipScale * shipDelta;
-
-		mediumShipSide = mediumShipScale * mediumShipSizeHard;
-	}
-
-	void printResolutionInfo()
-	{
-		std::cout << "Width = "  << widthInPixel  << std::endl;
-		std::cout << "Height = " << heightInPixel << std::endl;
-		std::cout << "Num Tiles in Width = "  << numTilesWidth  << std::endl;
-		std::cout << "Num Tiles in Height = " << numTilesHeight << std::endl;
-		std::cout << "Medium ship size width = " << mediumShipSide << std::endl;
-		std::cout << "Light ship scale " << ligthShipScale  << std::endl;
-		std::cout << "Medium ship scale "<< mediumShipScale << std::endl;
-		std::cout << "Heavy ship scale " << heavyShipScale  << std::endl;
-
-		std::cout << "Screen/MediumShip Ratio Width = "  << widthInPixel  / mediumShipSide << std::endl;
-		std::cout << "Screen/MediumShip Ratio Height = " << heightInPixel / mediumShipSide << std::endl;
-	}
 };
 
 struct Score
