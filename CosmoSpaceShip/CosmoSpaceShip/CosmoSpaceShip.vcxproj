@@ -152,6 +152,7 @@
     <ClInclude Include="Src\AssetManager.h" />
     <ClInclude Include="Src\Camera.h" />
     <ClInclude Include="Src\Collision.h" />
+    <ClInclude Include="Src\CS_types.h" />
     <ClInclude Include="Src\ECS\Animation.h" />
     <ClInclude Include="Src\ECS\ColliderComponent.h" />
     <ClInclude Include="Src\ECS\Components.h" />

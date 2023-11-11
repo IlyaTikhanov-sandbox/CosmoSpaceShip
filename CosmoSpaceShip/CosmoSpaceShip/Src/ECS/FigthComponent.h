@@ -18,17 +18,17 @@ public:
 	void MakeShot(AttackType type, Vector2D  direction, SoundHandler::soundType sound)
 	{
 		std::string projTexture = currentWeapon->getTextureID(type);
-		int texWidth = m_assets->GetTextureWidth(projTexture);
+		int texWidth = entity->getComponent<TransformComponent>().scaledWidth;
 		
 		if (type == UsualAttack)
 		{
-			Vector2D leftPos = entity->getComponent<TransformComponent>().getLeftAttackPos(texWidth * currentWeapon->getScale(type));
-			Vector2D rightPos = entity->getComponent<TransformComponent>().getRightAttackPos(texWidth * currentWeapon->getScale(type));
+			Vector2D leftPos = entity->getComponent<TransformComponent>().getLeftAttackPos(m_assets->GetTextureWidth(projTexture));
+			Vector2D rightPos = entity->getComponent<TransformComponent>().getRightAttackPos(m_assets->GetTextureWidth(projTexture));
 			m_assets->CreateProjectile(leftPos, texWidth, direction, currentWeapon->getRange(type), currentWeapon->getSpeed(type),
-				currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), projectile_gpoup,currentWeapon->getProjType(type));
+				currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), currentWeapon->getScreenFactor(type), projectile_gpoup,currentWeapon->getProjType(type));
 
 			m_assets->CreateProjectile(rightPos, texWidth, direction, currentWeapon->getRange(type), currentWeapon->getSpeed(type),
-				currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), true, currentWeapon->getScale(type), projectile_gpoup, currentWeapon->getProjType(type));
+				currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), true, currentWeapon->getScale(type), currentWeapon->getScreenFactor(type), projectile_gpoup, currentWeapon->getProjType(type));
 
 			currentWeapon->WeaponSound(sound);
 		}
@@ -37,10 +37,10 @@ public:
 			if (center_cooldown == 0)
 			{
 				center_cooldown = delay * 4;
-				Vector2D centralPos = entity->getComponent<TransformComponent>().getCentralPosTOP(texWidth * currentWeapon->getScale(type));
+				Vector2D centralPos = entity->getComponent<TransformComponent>().getCentralPosTOP(m_assets->GetTextureWidth(projTexture));
 
 				m_assets->CreateProjectile(centralPos, texWidth, direction, currentWeapon->getRange(type), currentWeapon->getSpeed(type),
-					currentWeapon->getDamage(type), projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), projectile_gpoup, currentWeapon->getProjType(type));
+					currentWeapon->getDamage(type), projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), currentWeapon->getScreenFactor(type), projectile_gpoup, currentWeapon->getProjType(type));
 				currentWeapon->WeaponSound(sound);
 			}
 		}
@@ -49,20 +49,20 @@ public:
 			if (ricochet_cooldown == 0)
 			{
 				ricochet_cooldown = delay * 2;
-				Vector2D leftPos = entity->getComponent<TransformComponent>().getLeftAttackPos(texWidth * currentWeapon->getScale(type));
-				Vector2D rightPos = entity->getComponent<TransformComponent>().getRightAttackPos(texWidth * currentWeapon->getScale(type));
+				Vector2D leftPos = entity->getComponent<TransformComponent>().getLeftAttackPos(m_assets->GetTextureWidth(projTexture));
+				Vector2D rightPos = entity->getComponent<TransformComponent>().getRightAttackPos(m_assets->GetTextureWidth(projTexture));
 
 				m_assets->CreateProjectile(leftPos, texWidth, Vector2D(-1, 1), currentWeapon->getRange(type), currentWeapon->getSpeed(type),
-					currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), projectile_gpoup, currentWeapon->getProjType(type));
+					currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), currentWeapon->getScreenFactor(type), projectile_gpoup, currentWeapon->getProjType(type));
 				
 				m_assets->CreateProjectile(rightPos, texWidth, Vector2D(1, 1), currentWeapon->getRange(type), currentWeapon->getSpeed(type),
-					currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), projectile_gpoup, currentWeapon->getProjType(type));
+					currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), currentWeapon->getScreenFactor(type), projectile_gpoup, currentWeapon->getProjType(type));
 				
 				m_assets->CreateProjectile(leftPos, texWidth, Vector2D(-1, -1), currentWeapon->getRange(type), currentWeapon->getSpeed(type),
-					currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), projectile_gpoup, currentWeapon->getProjType(type));
+					currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), currentWeapon->getScreenFactor(type), projectile_gpoup, currentWeapon->getProjType(type));
 
 				m_assets->CreateProjectile(rightPos, texWidth, Vector2D(1, -1), currentWeapon->getRange(type), currentWeapon->getSpeed(type),
-					currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), projectile_gpoup, currentWeapon->getProjType(type));
+					currentWeapon->getDamage(type) / 2, projTexture, currentWeapon->isAnim(type), false, currentWeapon->getScale(type), currentWeapon->getScreenFactor(type), projectile_gpoup, currentWeapon->getProjType(type));
 
 				currentWeapon->WeaponSound(sound);
 			}

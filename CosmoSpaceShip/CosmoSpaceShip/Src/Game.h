@@ -2,6 +2,7 @@
 
 #include "SDL.h"
 #include "ECS/Constants.h"
+#include "CS_types.h"
 #undef main
 #include "SDL_image.h"
 #include <iostream>
@@ -15,8 +16,7 @@
 
 #define FILE_PATH "assets/theme.wav"
 #define LVL_CHANGE 120
-//#define FRIENDLY
-
+//#define DEBUG
 
 class ColliderComponent;
 class AssetManager;
@@ -36,19 +36,13 @@ enum ProjectileType :int
 	Ricochet
 };
 
-enum LevelStage : int
-{
-	StageMenu,
-	StageRegular,
-	StageBoss
-};
-
 struct Attack
 {
 	int range;
 	int speed;
 	int damage;
 	int scale;
+	float screenFactor;
 	int delay;
 	std::string textureID;
 	bool isAnimated = true;
@@ -145,7 +139,7 @@ public:
 	static LevelStage currentStage;
 
 	//Resolution Parameters
-	ResolutionSettings* m_resolutionSettings;
+	static ResolutionSettings* m_resolutionSettings;
 	static int actualPlayWidth;
 	static int actualPlayHeight;
 
@@ -185,7 +179,8 @@ public:
 		groupColliders,
 		groupPlayerProjectiles,
 		groupEnemyProjectiles,
-		groupWeapons
+		groupWeapons,
+		groupTexts
 	};
 
 	enum CollisionType : int
@@ -215,4 +210,5 @@ private:
 
 	Score m_scoreCounter;
 };
+
 

@@ -32,3 +32,7 @@ static constexpr int ScreenShipRatioW = 9; //1152/128
 static constexpr int ScreenShipRatioH = 6; //896/128
 
 static constexpr float shipDelta = 1.5;
+
+static constexpr float mediumShipScreenCoef = 0.06f;
+static constexpr float heavyShipScreenCoef = 0.27f;
+static constexpr float ricochetHandlingCoef = 76.8f;

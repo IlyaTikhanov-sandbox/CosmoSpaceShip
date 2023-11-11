@@ -42,7 +42,7 @@ public:
 	int getHeavyShipScale() { return heavyShipScale; }
 
 private:
-	const int Base = 120; //make it changable
+	const int Base = 32; //make it changable
 
 	int widthInPixel;
 	int heightInPixel;

@@ -9,11 +9,12 @@ AssetManager::~AssetManager()
 {
 }
 
-void AssetManager::CreateProjectile(Vector2D pos, int width, Vector2D vel, int range, int speed, int damage, std::string id, bool isAnimated, bool flip, int scale_, Game::groupLabels pr_group,ProjectileType prType)
+void AssetManager::CreateProjectile(Vector2D pos, int width, Vector2D vel, int range, int speed, int damage, std::string id, bool isAnimated, bool flip, int scale_, float screenFactor, Game::groupLabels pr_group,ProjectileType prType)
 {
 	int height = width;
 	auto & projectile(manager->addEntity());
-	projectile.addComponent<TransformComponent>(pos.x, pos.y, width, height, scale_);
+	//projectile.addComponent<TransformComponent>(pos.x, pos.y, width, height, scale_);
+	projectile.addComponent<TransformComponent>(pos.x, pos.y, screenFactor, speed);
 	projectile.addComponent<SpriteComponent>(id, isAnimated);
 	projectile.addComponent<ProjectileComponent>(range, speed,damage,vel,prType);
 	projectile.addComponent<ColliderComponent>("projectile");

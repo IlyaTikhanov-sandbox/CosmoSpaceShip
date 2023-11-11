@@ -7,6 +7,8 @@
 #include <bitset>
 #include <array>
 
+#include <typeinfo>
+
 class Component;
 class Entity;
 class Manager;
@@ -125,8 +127,16 @@ public:
 	{
 		for (auto& e : entities)
 		{
-			if(e->isActive())
-				e->update();
+			try
+			{
+				//preventing violation access(some entities weren't deleted after refresh) TBD: investigate
+				if (e && e->isActive())
+					e->update();
+			}
+			catch (...)
+			{
+				std::cout << typeid(e).name() << std::endl;
+			}
 		}
 	}
 	void draw()

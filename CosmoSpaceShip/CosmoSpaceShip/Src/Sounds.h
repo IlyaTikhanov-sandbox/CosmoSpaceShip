@@ -2,6 +2,7 @@
 #include "SDL.h"
 #include "SDL_mixer.h"
 #include <iostream>
+#include "CS_types.h"
 
 #define FILE_PATH "assets/theme.wav"
 #define ROCK_FILE_PATH "assets/theme_rock.wav"
@@ -17,7 +18,11 @@ struct AudioData
 class SoundHandler
 {
 public:
-	Mix_Music *backgroundMusic;
+	Mix_Music* backgroundMenuMusic;
+	Mix_Music *backgroundMusicRegular;
+	Mix_Music *backgroundMusicBoss;
+
+
 	Mix_Music *backgroundRockMusic;
 	Mix_Music *CurrentBackground;
 
@@ -58,7 +63,7 @@ public:
 	~SoundHandler();
 
 	void playSound(soundType sound);
-	void changeBackgroundSound(SoundHandler::MusicType mtype);
+	void changeBackgroundSound(LevelStage stage);
 
 	void init();
 

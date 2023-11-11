@@ -24,6 +24,15 @@ public:
 		collider.h = collider.w = size;
 	}
 
+	ColliderComponent(std::string t, int xPos, int yPos, int width, int height)
+	{
+		tag = t;
+		collider.x = xPos;
+		collider.y = yPos;
+		collider.h = height;
+		collider.w = width;
+	}
+
 	TransformComponent* transform;
 
 	void init() override
@@ -47,8 +56,8 @@ public:
 		{
 			collider.x = static_cast<int>(transform->position.x);
 			collider.y = static_cast<int>(transform->position.y);
-			collider.w = static_cast<int>(transform->width * transform->scale);
-			collider.h = static_cast<int>(transform->height * transform->scale);
+			collider.w = static_cast<int>(transform->scaledWidth);
+			collider.h = static_cast<int>(transform->scaledHeight);
 		}
 
 		destR.x = collider.x - Game::camera.x;

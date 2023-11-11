@@ -16,18 +16,23 @@ public:
 	//Game Objects
 	void CreateProjectile(Vector2D pos, int width, Vector2D vel, int range,
 		int speed, int damage, std::string id, bool isAnimated, bool flip,
-		int scale_, Game::groupLabels pr_group, ProjectileType prType);
+		int scale_,float screenFactor, Game::groupLabels pr_group, ProjectileType prType);
 
 	//Texture management
 	void AddTexture(std::string id, const char* path, int width = 32);
+	void AddFont(std::string id, std::string path, int fontSize);
+
+	//Getters
 	SDL_Texture* GetTexture(std::string id);
+	TTF_Font*    GetFont(std::string id);
+	
 	int GetTextureWidth(std::string id)
 	{
 		return textures[id].second;
 	}
 
-	void AddFont(std::string id, std::string path, int fontSize);
-	TTF_Font* GetFont(std::string id);
+	
+	
 
 private:
 	Manager* manager;

@@ -36,6 +36,22 @@ public:
 		destRect.w = destRect.h = tsize * tscale;
 	
 	}
+	TileComponent(int srcX, int srcY, int xpos, int ypos,int tsize, int w, int h, std::string id)
+	{
+		texture = Game::assets->GetTexture(id);
+
+		position.x = xpos;
+		position.y = ypos;
+
+		srcRect.x = srcX;
+		srcRect.y = srcY;
+		srcRect.w = srcRect.h = tsize;
+
+		destRect.x = xpos;
+		destRect.y = ypos;
+		destRect.w = w;
+		destRect.h = h;
+	}
 
 	void update() override
 	{

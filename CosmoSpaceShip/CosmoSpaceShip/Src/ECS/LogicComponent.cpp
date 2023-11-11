@@ -8,7 +8,7 @@ void LogicComponent::GoToThePoint(Vector2D destPoint)
 	OwnTransform->velocity.y = abs(Ydiff) < 3 ? 0 : Ydiff / abs(Ydiff);
 	//if(OwnTransform->velocity.x)
 	//	sprite->spriteFlip = OwnTransform->velocity.x < 0 ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
-	sprite->Play(Anims::Idle);
+	//sprite->Play(Anims::Idle);
 }
 
 
@@ -85,7 +85,7 @@ void LogicComponent::Bossstay()
 	busy = false;
 	OwnTransform->velocity.x = 0;
 	OwnTransform->velocity.y = 0;
-	sprite->Play(Anims::BossIdle);
+	//sprite->Play(Anims::BossIdle);
 }
 
 void LogicComponent::update()

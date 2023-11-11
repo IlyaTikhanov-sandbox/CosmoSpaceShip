@@ -45,7 +45,7 @@ public:
 	void changeRicochetDirY()
 	{
 		transform->velocity.y *= -1;
-		transform->position.y += transform->velocity.y ;
+		transform->position.y += 4 * transform->velocity.y ;
 	}
 
 	int getDamage() { return damage; }

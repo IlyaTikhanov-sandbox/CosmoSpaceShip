@@ -16,6 +16,7 @@ Map::~Map()
 
 }
 
+
 void Map::LoadMap(std::string path, int sizeX, int sizeY, int window_widgth, int window_height)
 {
 	char c;
@@ -32,14 +33,12 @@ void Map::LoadMap(std::string path, int sizeX, int sizeY, int window_widgth, int
 				tcol.addComponent<ColliderComponent>("terrain", x * scaledSize, y * scaledSize, scaledSize);
 				tcol.addGroup(Game::groupColliders);
 			}
-			else
-			{
-				srcY = 0;
-				srcX = 0;
-				AddTile(srcX, srcY, x * (tileSize * mapScale), y * (tileSize * mapScale));
-			}
 		}
 	}
+
+	srcY = 0;
+	srcX = 0;
+	AddTileSized(srcX, srcY, Game::camera.x, Game::camera.y,window_widgth,window_height);
 
 	/*
 	for (int y = 0; y < sizeY; ++y)
@@ -62,6 +61,13 @@ void Map::AddTile(int srcX, int srcY, int xpos, int ypos)
 {
 	auto & tile(manager.addEntity());
 	tile.addComponent<TileComponent>(srcX, srcY, xpos, ypos, tileSize,mapScale,texID);
+	tile.addGroup(Game::groupMap);
+}
+
+void Map::AddTileSized(int srcX, int srcY, int xpos, int ypos, int w, int h)
+{
+	auto& tile(manager.addEntity());
+	tile.addComponent<TileComponent>(srcX, srcY, xpos, ypos, tileSize, w,h, texID);
 	tile.addGroup(Game::groupMap);
 }
 
