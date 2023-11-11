@@ -23,11 +23,11 @@ Manager manager;
 SDL_Renderer * Game::renderer = nullptr;
 SDL_Event Game::event;
 
-//SDL_Rect Game::camera = {32 * MAP_TILE_SCALE,32 * MAP_TILE_SCALE, WINDOW_WIDTH - (32 * MAP_TILE_SCALE) * 2, WINDOW_HEIGHT - (32 * MAP_TILE_SCALE) * 2};
-SDL_Rect Game::camera = {32 * MAP_TILE_SCALE,32 * MAP_TILE_SCALE, PlAY_HD_WIDTH, PLAY_HD_HEIGHT};
+SDL_Rect Game::camera = { 0,0, 0, 0 };
 
 AssetManager* Game::assets = new AssetManager(&manager);
 Menu* Game::m_gameMenu = nullptr;
+ResolutionSettings* Game::m_resolutionSettings = nullptr;
 
 
 
@@ -58,7 +58,13 @@ Game::Game()
 	gameMenuCooldown  = gameMenuDelay;
 	gameMenuCooldown2 = gameMenuDelay;
 
+	sounder = new SoundHandler();
 	m_resolutionSettings = new ResolutionSettings();
+
+	m_resolutionSettings->calculateResolution(1920, 1080);
+	camera.w = m_resolutionSettings->getWindowWidth();
+	camera.h = m_resolutionSettings->getWindowHeight();
+	m_resolutionSettings->printResolutionInfo();
 }
 
 Game::~Game()
@@ -69,9 +75,11 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 	//switch_on = true;
 	int flags = 0;
 
+	// --LEGACY
 	m_playHeight = height;
 	m_playWidth  = width;
-	
+	// --/LEGACY
+
 	if (fullscreen)
 	{
 		flags = SDL_WINDOW_FULLSCREEN;
@@ -80,6 +88,7 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0)
 	{
 		std::cout << "Subsystem Initialized..." << std::endl;
+		//Use ResolutionSettings
 		window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
 		if (window)
 		{
@@ -104,19 +113,18 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 		std::cout << "Error Initializing SDL TTF" << std::endl;
 	}
 
-	sounder = new SoundHandler();
 	sounder->init();
 
+	//Preparing data
 	LoadAssets(); //also map gets created
-	
 	WeaponsInit();
 
+	//kinda levels loading
 	playerInit();
-
 	InitLvl1(3);
+	BossInit(Game::camera.w / 2 - (m_resolutionSettings->getWindowWidth() * heavyShipScreenCoef / 2), 5.0f, "BossShip");
 
-	BossInit(500.0f, 70.0f, "BossShip");
-
+	//Menu creation
 	CreateMenu();
 }
 
@@ -129,11 +137,12 @@ auto& PlayerProjectiles(manager.getGroup(Game::groupPlayerProjectiles));
 auto& EnemyProjectiles(manager.getGroup(Game::groupEnemyProjectiles));
 auto& Weapons(manager.getGroup(Game::gpoupWeapons));
 
+
 void Game::handleEvents()
 {
 	for (auto& player : manager.getGroup(Game::groupPlayers))
 	{
-		if (!player->isActive())
+		if (player && !player->isActive())
 		{
 			resetGame();
 			switchToGameMenu();
@@ -255,7 +264,7 @@ void Game::update()
 		for (auto& e : enemies)
 		{
 			SDL_Rect enCol = e->getComponent<ColliderComponent>().collider;
-			if (Collision::AABB(prCol, enCol)) //player hit enemy
+			if (e && Collision::AABB(prCol, enCol)) //player hit enemy
 			{
 				//std::cout << "player hit some enemy" << std::endl;
 				e->getComponent<HealthComponent>().gotHit();
@@ -270,7 +279,7 @@ void Game::update()
 			}
 		}
 	}
-#ifndef FRIENDLY
+#ifndef DEBUG
 	//Enemy hit player detection
 	for (auto& pr : EnemyProjectiles)
 	{
@@ -299,15 +308,19 @@ void Game::update()
 #endif 
 
 	//Blocking Collision
+
+	//getPlayerCollider
 	SDL_Rect playerCol;
 	for (auto& player : manager.getGroup(Game::groupPlayers))
 	{
 		playerCol = player->getComponent<ColliderComponent>().collider;
 	}
 	
+	//
 	SDL_Rect enemyCol;
 	for (auto& c : colliders)
 	{
+		//player collision
 		SDL_Rect cCol = c->getComponent<ColliderComponent>().collider;
 		if (Collision::AABB(playerCol, cCol))
 		{
@@ -317,6 +330,8 @@ void Game::update()
 			}
 			
 		}
+
+		//enemies collision
 		for (auto& e : enemies)
 		{
 			enemyCol = e->getComponent<ColliderComponent>().collider;
@@ -326,14 +341,18 @@ void Game::update()
 					e->getComponent<TransformComponent>().position = e->getComponent<TransformComponent>().prevPosition;
 			}
 		}
+
+
 		for (auto& pr : EnemyProjectiles)
 		{
-			if (pr->getComponent<ProjectileComponent>().projType == ProjectileType::Ricochet)
+			if (pr->getComponent<ProjectileComponent>().projType == ProjectileType::Ricochet) //Ricochet Handling
 			{
 				SDL_Rect prCol = pr->getComponent<ColliderComponent>().collider;
 				if (Collision::AABB(prCol, cCol))
 				{
-					if (abs(pr->getComponent<TransformComponent>().position.y - 70.0f) < 50)
+					Vector2D prPos = pr->getComponent<TransformComponent>().position;
+					if( (abs(m_resolutionSettings->getWindowHeight() - prPos.y) < 10 ||
+					   abs(prPos.y - 0) < 10) )
 					{
 						pr->getComponent<ProjectileComponent>().changeRicochetDirY();
 						pr->getComponent<ColliderComponent>().update();
@@ -344,6 +363,8 @@ void Game::update()
 						pr->getComponent<ColliderComponent>().update();
 					}
 				}
+
+
 			}
 		}
 	}
@@ -377,10 +398,10 @@ void Game::render()
 		e->draw();
 	}
 
-	//for (auto& c : colliders)
-	//{
-	//	c->draw();
-	//}
+	for (auto& c : colliders)
+	{
+		c->draw();
+	}
 	
 	for (auto& pr : PlayerProjectiles)
 	{
@@ -418,6 +439,7 @@ void Game::ChangeLevel()
 	++num;
 
 	currentStage = static_cast<LevelStage>(num);
+	sounder->changeBackgroundSound(currentStage);
 
 	if (currentStage > LevelStage::StageBoss)
 	{
@@ -441,13 +463,13 @@ void Game::prepareGameMenu()
 {
 	SDL_Color white = { 255,255,255,255 };
 	playLabel.addComponent<UILabel>(m_playWidth / 2 - 48, m_playHeight / 2 - 200,      "play", "courier", white);
+	playLabel.addGroup(groupTexts);
 	exitLabel.addComponent<UILabel>(m_playWidth / 2 - 48, m_playHeight / 2 - 200 + 48, "exit", "courier", white);
+	exitLabel.addGroup(groupTexts);
 	score.addComponent<UILabel>(0, m_playHeight - 50, "0","courier", white);
-	//playLabel.addComponent<UILabel>(m_gameMenu->getLabelbyKey("play")); TBD: find out why it is not working
+	score.addGroup(groupTexts);
 
-	//m_resolutionSettings->changeResolution(1920, 1080);
-	//m_resolutionSettings->changeResolution(1152,896);
-	m_resolutionSettings->printResolutionInfo();
+	//playLabel.addComponent<UILabel>(m_gameMenu->getLabelbyKey("play")); TBD: find out why it is not working
 }
 
 void Game::updateGameMenu()
@@ -513,6 +535,7 @@ bool Game::isGameMenuGameClosed()
 
 void Game::switchToGameMenu()
 {
+	//TBD: Implement stages handling system
 	currentStage = LevelStage::StageMenu;
 	m_gameMenu->resetCurrentButton();
 	renderGameMenu();
@@ -591,7 +614,9 @@ void Game::activateMenuButton(int currentButton)
 	case MenuButtons::Play:
 		//std::cout << "Play button was hit!" << std::endl;
 		m_gameMenu->changeMenuStatus(MenuStatus::Finished);
-		currentStage = LevelStage::StageRegular;
+		ChangeLevel();
+		//for (auto& e : manager.getGroup(groupTexts))
+		//	e->destroy();
 		break;
 	case MenuButtons::Exit:
 		//std::cout << "Exit button was hit!" << std::endl;
@@ -614,6 +639,7 @@ void Game::drawBackground()
 void Game::LoadAssets()
 {
 	assets->AddTexture("space", "assets/space_map_tileset.png");
+	assets->AddTexture("space_16_9", "assets/space_16_9.png");
 
 	assets->AddTexture("Ship", "assets/ship_anims.png");
 	assets->AddTexture("Player_Attack", "assets/player_proj_8.png", 8);
@@ -633,9 +659,13 @@ void Game::LoadAssets()
 
 	assets->AddFont("courier", "assets/cour.ttf", 48);
 
-	map = new Map("space", MAP_TILE_SCALE, 32);
-	//map->LoadMap("assets/space_map_HD.map", WIDTH_IN_TILES, HEIGHT_IN_TILES, walkinMap);
-	map->LoadMap("assets/space_map_HD.map", 32, 18, walkinMap);
+	map = new Map("space_16_9", 1, m_resolutionSettings->getBaseTileSize());
+	map->LoadMap("assets/space_map_HD.map",
+		m_resolutionSettings->getWidthInTiles(),
+		m_resolutionSettings->getHeightInTiles(),
+		m_resolutionSettings->getWindowWidth(),
+		m_resolutionSettings->getWindowHeight()
+	);
 }
 
 void Game::InitWeapon(WeaponParams * weapon,  SoundHandler * sounder)
@@ -645,6 +675,7 @@ void Game::InitWeapon(WeaponParams * weapon,  SoundHandler * sounder)
 
 void Game::WeaponsInit()
 {
+	//TBD: Implement some smart Weapon system with loading data from binary file
 	/*	
 	int range;
 	int speed;
@@ -661,8 +692,12 @@ void Game::WeaponsInit()
 
 	PlayerAttack.range = 400;
 	PlayerAttack.speed = 3;
-	PlayerAttack.scale = 2;
+	PlayerAttack.scale = 0.001;
+	PlayerAttack.screenFactor = 0.01;
 	PlayerAttack.damage = 25;
+#ifdef DEBUG
+	PlayerAttack.damage = 25000000;
+#endif // DEBUG
 	PlayerAttack.delay = 20;
 	PlayerAttack.rotate = false;
 	PlayerAttack.isAnimated = false;
@@ -680,7 +715,7 @@ void Game::WeaponsInit()
 
 	EnemyAttack.range = 400;
 	EnemyAttack.speed = 3;
-	EnemyAttack.scale = 2;
+	EnemyAttack.screenFactor = 0.01;
 	EnemyAttack.damage = 100;
 	EnemyAttack.delay = 60;
 	EnemyAttack.rotate = false;
@@ -698,7 +733,7 @@ void Game::WeaponsInit()
 
 	BossUsualAttack.range = 400;
 	BossUsualAttack.speed = 3;
-	BossUsualAttack.scale = 3;
+	BossUsualAttack.screenFactor = 0.01;
 	BossUsualAttack.damage = 100;
 	BossUsualAttack.delay = 60;
 	BossUsualAttack.rotate = false;
@@ -712,7 +747,7 @@ void Game::WeaponsInit()
 
 	BossCenterAttack.range = 400;
 	BossCenterAttack.speed = 3;
-	BossCenterAttack.scale = 3;
+	BossCenterAttack.screenFactor = 0.01;
 	BossCenterAttack.damage = 100;
 	BossCenterAttack.delay = 20;
 	BossCenterAttack.rotate = false;
@@ -724,9 +759,9 @@ void Game::WeaponsInit()
 
 	Attack BossRicochetAttack;
 
-	BossRicochetAttack.range = 1000;
+	BossRicochetAttack.range = 1600;
 	BossRicochetAttack.speed = 3;
-	BossRicochetAttack.scale = 2;
+	BossRicochetAttack.screenFactor = 0.01;
 	BossRicochetAttack.damage = 100;
 	BossRicochetAttack.delay = 60;
 	BossRicochetAttack.rotate = false;
@@ -756,6 +791,8 @@ void Game::playerInit()
 	//need to get rid of using global player and access player from manager.getGroup(groupPlayers) in every place that calls player
 	//then we might be able to create player again and again like enemies
 	//since it has keyboard controller we will have the control...
+	float playerXpos = Game::camera.w / 2 - (Game::camera.w * mediumShipScreenCoef / 2);
+	float playerYpos = Game::camera.h * 0.7;
 	if (manager.getGroup(groupPlayers).empty())
 	{
 		auto& player(manager.addEntity());
@@ -764,7 +801,7 @@ void Game::playerInit()
 	for (auto& player : manager.getGroup(Game::groupPlayers))
 	{
 		//player.addGroup(groupPlayers);
-		player->addComponent<TransformComponent>(610.0f, 815.0f, PLAYER_SCALE, 7);
+		player->addComponent<TransformComponent>(playerXpos, playerYpos, mediumShipScreenCoef , 8);
 		player->addComponent<SpriteComponent>("Ship", true);
 		player->addComponent<TimingComponent>();
 		player->addComponent<FigthComponent>(assets, player_weapon, Game::groupLabels::groupPlayerProjectiles);
@@ -780,7 +817,7 @@ void Game::enemyInit(float xpos, float ypos, std::string texture)
 {
 	auto& enemy(manager.addEntity());                 //scale
 	enemy.addGroup(groupEnemies);
-	enemy.addComponent<TransformComponent>(xpos, ypos,    3,    6);
+	enemy.addComponent<TransformComponent>(xpos, ypos, mediumShipScreenCoef,    7);
 	enemy.addComponent<SpriteComponent>(texture, true);
 	enemy.addComponent<FigthComponent>(assets, enemy_weapon, Game::groupLabels::groupEnemyProjectiles);
 	enemy.addComponent<ColliderComponent>("enemy");
@@ -793,7 +830,7 @@ void Game::BossInit(float xpos, float ypos, const char * texture)
 {
 	auto& boss(manager.addEntity());
 	boss.addGroup(groupBoss);
-	boss.addComponent<TransformComponent>(xpos, ypos, assets->GetTextureWidth(texture), assets->GetTextureWidth(texture), 5, 1);
+	boss.addComponent<TransformComponent>(xpos, ypos, assets->GetTextureWidth(texture), assets->GetTextureWidth(texture), heavyShipScreenCoef, 1);
 	boss.addComponent<SpriteComponent>(texture, false,assets->GetTextureWidth(texture));
 	boss.addComponent<FigthComponent>(assets, boss_weapon, Game::groupLabels::groupEnemyProjectiles);
 	boss.addComponent<ColliderComponent>("Boss");
@@ -819,6 +856,7 @@ std::string PickTexture(int rand_id)
 
 void Game::InitLvl1(int Num_Enemies)
 {
+	//TBD: Implement some smart Level System generating the next level with progressive difficulty
 	std::uniform_int_distribution<int> xpos(70, 1115);
 	std::uniform_int_distribution<int> TexId(0, 2);
 	std::vector <int> positions;
@@ -831,6 +869,7 @@ void Game::InitLvl1(int Num_Enemies)
 		//Make sure Textures won't intersept 
 		for (int pos : positions)
 		{
+			//TBD: get rid of hardcoded value, need to get currently loading ship sizes , probably it will be a part of Level System
 			if (abs(new_pos - pos) < 32 * 3)
 			{
 				fit = false;
@@ -873,7 +912,7 @@ void Game::reInit()
 
 	m_scoreCounter.resetScore();
 
-	BossInit(500.0f, 70.0f, "BossShip");
+	BossInit(Game::camera.w / 2 - (m_resolutionSettings->getWindowWidth() * heavyShipScreenCoef / 2), 5.0f,"BossShip");
 }
 
 bool Game::isPlayerActive()
@@ -881,7 +920,11 @@ bool Game::isPlayerActive()
 	for (auto& player : manager.getGroup(Game::groupPlayers))
 	{
 		//TBD: make sure that there are only one player at a time in groupPlayes
-		return player->isActive();
+		if (manager.getGroup(Game::groupPlayers).size() == 1)
+			std::cout << "ONE PLAYER NOW! " << std::endl;
+
+		if(player)
+			return player->isActive();
 	}
 }
 

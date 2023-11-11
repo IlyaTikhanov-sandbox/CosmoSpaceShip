@@ -28,6 +28,7 @@ public:
 	int getSpeed(AttackType type) { return attacks[type].speed; }
 	int getDamage(AttackType type) { return attacks[type].damage; }
 	int getDelay(AttackType type) { return attacks[type].delay; }
+	float getScreenFactor(AttackType type) { return attacks[type].screenFactor; }
 	std::string getTextureID(AttackType type) { return attacks[type].textureID; }
 	bool isAnim(AttackType type) { return attacks[type].isAnimated; }
 	int getScale(AttackType type) { return attacks[type].scale; }

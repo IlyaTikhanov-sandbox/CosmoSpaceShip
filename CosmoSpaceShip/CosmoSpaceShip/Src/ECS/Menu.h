@@ -27,7 +27,7 @@ public:
 
 		SDL_Color white = { 255,255,255,255 };
 
-		UILabel play = UILabel(PLAY_WIDTH / 2, PLAY_HEIGHT / 2, "Play", "courier", white);
+		UILabel play = UILabel(Game::camera.w / 2, Game::camera.h / 2, "Play", "courier", white);
 
 		m_currentButton = 0;
 		m_contentMenu.emplace("play",play);

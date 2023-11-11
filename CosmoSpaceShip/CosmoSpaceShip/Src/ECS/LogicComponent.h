@@ -72,7 +72,6 @@ private:
 	
 	int wasHit = 0;
 
-
 	bool idle = false;
 	bool busy = false;
 	bool goLeft = false;

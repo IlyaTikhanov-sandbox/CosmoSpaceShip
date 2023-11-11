@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Components.h"
-#include "Constants.h"
+#include "../Game.h"
 #include "../Vector2D.h"
 
 class TransformComponent : public Component
@@ -23,13 +23,14 @@ public:
 	int scaledWidth = 0;
 
 	int scale = 1;
+	float screenCoeff = 0;
 
 	int speed = 3;
 
 	Vector2D getCentralPosTOP(int width = 0)
 	{
 		return Vector2D(position.x + (scaledWidth / 2) - (width / 2), position.y + scaledHeight);
-	}
+	} 
 
 	Vector2D getLeftAttackPos(int width = 0)  { return Vector2D(position.x + scaledWidth * 0.125 - (width / 2), position.y + scaledHeight * 0.65); }
 	Vector2D getRightAttackPos(int width = 0) { return Vector2D(position.x + scaledWidth * (1-0.125) - (width / 2), position.y + scaledHeight * 0.65); }
@@ -86,6 +87,27 @@ public:
 		speed = speed_;
 	}
 
+	//<summary> Constructor considering Screen Resolution </summary>
+	TransformComponent(float x, float y, float screenResolutionFactor, int speed_)
+	{
+		startPosX = x;
+		startPosY = y;
+		position.x = x;
+		position.y = y;
+		screenCoeff = screenResolutionFactor;
+		scale = 0;
+		speed = speed_;
+
+		int checkScaledHeight = 0;
+		int checkScaledWidth = 0;
+		if (screenCoeff != 0)
+		{
+			checkScaledHeight = Game::m_resolutionSettings->getWindowWidth() * screenCoeff;
+			checkScaledWidth = Game::m_resolutionSettings->getWindowWidth() * screenCoeff;
+		}
+	}
+
+
 	TransformComponent(float x, float y, int h, int w, int scale_)
 	{
 		height = h;
@@ -96,6 +118,19 @@ public:
 		position.x = x;
 		position.y = y;
 	}
+
+	TransformComponent(float x, float y, int h, int w, float screenCoef_, int speed_)
+	{
+		height = h;
+		width = w;
+		screenCoeff = screenCoef_;
+		startPosX = x;
+		startPosY = y;
+		position.x = x;
+		position.y = y;
+		speed = speed_;
+	}
+
 	TransformComponent(float x, float y, int h, int w, int scale_,int speed_)
 	{
 		height = h;
@@ -111,8 +146,16 @@ public:
 	void init() override
 	{
 		velocity.Zero();
-		scaledHeight = height * scale;
-		scaledWidth = width * scale;
+		if (screenCoeff != 0)
+		{
+			scaledHeight = Game::m_resolutionSettings->getWindowWidth() * screenCoeff;
+			scaledWidth = Game::m_resolutionSettings->getWindowWidth() * screenCoeff;
+		}
+		else
+		{
+			scaledHeight = height * scale;
+			scaledWidth = width * scale;
+		}
 	}
 	void update() override
 	{
@@ -134,12 +177,12 @@ public:
 		int XNextPosition = position.x + direction.x * length;
 		if (XNextPosition < 0)
 		{
-			XNextPosition = 68;
+			XNextPosition = 1;
 		}
-		else if (XNextPosition + 32 * PLAYER_SCALE * 2 > WINDOW_WIDTH)
+		else if (XNextPosition + 32 * scale * 2 > Game::camera.w)
 		{
 			std::cout << "RIGHT LEAP PREVENT OUT OF BORDER!!" << std::endl;
-			XNextPosition = PLAY_WIDTH - 32 * PLAYER_SCALE - 10;
+			XNextPosition = Game::camera.w - 32 * scale - 10;
 		}
 		position.x = XNextPosition;
 	}

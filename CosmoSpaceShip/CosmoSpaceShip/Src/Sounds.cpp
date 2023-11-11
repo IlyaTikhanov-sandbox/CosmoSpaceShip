@@ -8,7 +8,7 @@ SoundHandler::SoundHandler()
 
 SoundHandler::~SoundHandler()
 {
-	Mix_FreeMusic(backgroundMusic);
+	Mix_FreeMusic(backgroundMusicRegular);
 	Mix_FreeChunk(leftAttackEffect);
 	Mix_FreeChunk(rightAttackEffect);
 	Mix_FreeChunk(upAttackEffect);
@@ -44,8 +44,27 @@ void SoundHandler::playSound(soundType sound)
 	}
 }
 
-void SoundHandler::changeBackgroundSound(SoundHandler::MusicType mtype)
+void SoundHandler::changeBackgroundSound(LevelStage stage)
 {
+	switch (stage)
+	{
+	case StageMenu:
+		CurrentBackground = backgroundMenuMusic;
+		break;
+	case StageRegular:
+		CurrentBackground = backgroundMusicRegular;
+		break;
+	case StageBoss:
+		CurrentBackground = backgroundMusicBoss;
+		break;
+	default:
+		break;
+	}
+
+	//Mix_FadeOutMusic(0);
+	Mix_PlayMusic(CurrentBackground, -1);
+	//Mix_FadeInMusic(CurrentBackground, -1, 500);
+
 	//if (CurrentBackground)
 	//	Mix_FreeMusic(CurrentBackground);
 
@@ -57,21 +76,8 @@ void SoundHandler::changeBackgroundSound(SoundHandler::MusicType mtype)
 
 	//Mix_GetMusicPositio
 
-
-
-	switch (mtype)
-	{
-	case SoundHandler::Boring:
-		CurrentBackgroundChunk = backgroundBoringChunk;
-		break;
-	case SoundHandler::Rock:
-		CurrentBackgroundChunk = backgroundRockChunk;
-		break;
-	default:
-		break;
-	}
 	//Mix_PlayChannel(0, CurrentBackgroundChunk, -1);
-	Mix_PlayMusic(CurrentBackground, -1);
+	
 	
 	/*
 	switch (mtype)
@@ -94,18 +100,9 @@ void SoundHandler::init()
 
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
 
-	backgroundMusic = Mix_LoadMUS("assets/space_theme.wav");
-	/*
-	backgroundRockMusic = Mix_LoadMUS("assets/theme_rock.wav");
-
-	backgroundBoringChunk = Mix_LoadWAV("assets/theme_boring.wav");
-	backgroundRockChunk = Mix_LoadWAV("assets/theme_rock.wav");
-
-	leftAttackEffect = Mix_LoadWAV("assets/attack_left.wav");
-	rightAttackEffect = Mix_LoadWAV("assets/attack_right.wav");
-
-	downAttackEffect = Mix_LoadWAV("assets/attack_down.wav");
-	*/
+	backgroundMenuMusic = Mix_LoadMUS("assets/space_theme_menu.mp3");
+	backgroundMusicRegular = Mix_LoadMUS("assets/space_theme_regular.mp3");
+	backgroundMusicBoss = Mix_LoadMUS("assets/space_theme_boss.mp3");
 
 	explosive_sound = Mix_LoadWAV("assets/explosive.wav");
 	upAttackEffect = Mix_LoadWAV("assets/attack.wav");
@@ -119,7 +116,7 @@ void SoundHandler::init()
 
 	Mix_VolumeMusic(40);
 
-	CurrentBackground = backgroundMusic;
+	CurrentBackground = backgroundMusicRegular;
 
 
 	//Mix_PlayChannel(0, CurrentBackgroundChunk, -1);

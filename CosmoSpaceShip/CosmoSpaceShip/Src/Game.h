@@ -2,6 +2,7 @@
 
 #include "SDL.h"
 #include "ECS/Constants.h"
+#include "CS_types.h"
 #undef main
 #include "SDL_image.h"
 #include <iostream>
@@ -11,11 +12,11 @@
 //#include "ECS/ECS.h"
 #include <map>
 #include <random>
+#include "ResolutionSettings.h"
 
 #define FILE_PATH "assets/theme.wav"
 #define LVL_CHANGE 120
-//#define FRIENDLY
-
+//#define DEBUG
 
 class ColliderComponent;
 class AssetManager;
@@ -35,19 +36,13 @@ enum ProjectileType :int
 	Ricochet
 };
 
-enum LevelStage : int
-{
-	StageMenu,
-	StageRegular,
-	StageBoss
-};
-
 struct Attack
 {
 	int range;
 	int speed;
 	int damage;
 	int scale;
+	float screenFactor;
 	int delay;
 	std::string textureID;
 	bool isAnimated = true;
@@ -64,55 +59,6 @@ struct WeaponParams
 	int Attack_num;
 	std::map<AttackType, Attack> attacks;
 	SoundHandler *pSounder;
-};
-
-struct ResolutionSettings
-{
-	const int Base = backgroundTileSize;
-
-	int widthInPixel  = defaultPlayWidth;
-	int heightInPixel = defaultPlayHeight;
-
-	int numTilesWidth  = defaultWidthInTiles;
-	int numTilesHeight = defaultHeightInTiles;
-
-	int mediumShipSide = widthInPixel / ScreenShipRatioW;
-	int ligthShipScale  = defaultPlayerScale / shipDelta;
-	int mediumShipScale = defaultPlayerScale;
-	int heavyShipScale  = defaultPlayerScale * shipDelta;
-
-
-	void changeResolution(int newWidth, int newHeight)
-	{
-		widthInPixel  = newWidth;
-		heightInPixel = newHeight;
-
-		numTilesWidth  = widthInPixel / Base;
-		numTilesHeight = heightInPixel / Base;
-
-		mediumShipSide  = widthInPixel / ScreenShipRatioW;
-		mediumShipScale = mediumShipSide / Base;
-
-		ligthShipScale  = mediumShipScale / shipDelta;
-		heavyShipScale  = mediumShipScale * shipDelta;
-
-		mediumShipSide = mediumShipScale * mediumShipSizeHard;
-	}
-
-	void printResolutionInfo()
-	{
-		std::cout << "Width = "  << widthInPixel  << std::endl;
-		std::cout << "Height = " << heightInPixel << std::endl;
-		std::cout << "Num Tiles in Width = "  << numTilesWidth  << std::endl;
-		std::cout << "Num Tiles in Height = " << numTilesHeight << std::endl;
-		std::cout << "Medium ship size width = " << mediumShipSide << std::endl;
-		std::cout << "Light ship scale " << ligthShipScale  << std::endl;
-		std::cout << "Medium ship scale "<< mediumShipScale << std::endl;
-		std::cout << "Heavy ship scale " << heavyShipScale  << std::endl;
-
-		std::cout << "Screen/MediumShip Ratio Width = "  << widthInPixel  / mediumShipSide << std::endl;
-		std::cout << "Screen/MediumShip Ratio Height = " << heightInPixel / mediumShipSide << std::endl;
-	}
 };
 
 struct Score
@@ -193,7 +139,7 @@ public:
 	static LevelStage currentStage;
 
 	//Resolution Parameters
-	ResolutionSettings* m_resolutionSettings;
+	static ResolutionSettings* m_resolutionSettings;
 	static int actualPlayWidth;
 	static int actualPlayHeight;
 
@@ -233,7 +179,8 @@ public:
 		groupColliders,
 		groupPlayerProjectiles,
 		groupEnemyProjectiles,
-		groupWeapons
+		groupWeapons,
+		groupTexts
 	};
 
 	enum CollisionType : int
@@ -263,4 +210,5 @@ private:
 
 	Score m_scoreCounter;
 };
+
 

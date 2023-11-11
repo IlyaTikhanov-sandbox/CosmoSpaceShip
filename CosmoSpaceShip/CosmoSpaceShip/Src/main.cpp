@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
 	game = new Game();
 	//game->init("CosmoSpaceShip", WINDOW_WIDTH - 32 * MAP_TILE_SCALE * 2, WINDOW_HEIGHT - 32 * MAP_TILE_SCALE * 2, false);
-	game->init("CosmoSpaceShip", PlAY_HD_WIDTH, PLAY_HD_HEIGHT, false);
+	game->init("CosmoSpaceShip", game->m_resolutionSettings->getWindowWidth(), game->m_resolutionSettings->getWindowHeight(), false);
 
 	if (game->currentStage == StageMenu)
 	{
