@@ -1,0 +1,7 @@
+.vs
+.vscode
+docs/*~*
+src/out
+build/
+*.orig
+log/*
