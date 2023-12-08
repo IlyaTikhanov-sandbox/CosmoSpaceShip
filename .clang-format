@@ -1,6 +1,6 @@
 ---
 Language:        Cpp
-BasedOnStyle:  Mozilla
+BasedOnStyle:  Microsoft
 AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: false
@@ -22,19 +22,19 @@ BinPackArguments: false
 BinPackParameters: false
 BraceWrapping:   
   AfterClass:      true
-  AfterControlStatement: false
+  AfterControlStatement: true
   AfterEnum:       true
   AfterFunction:   true
-  AfterNamespace:  false
-  AfterObjCDeclaration: false
+  AfterNamespace:  true
+  AfterObjCDeclaration: true
   AfterStruct:     true
   AfterUnion:      true
   AfterExternBlock: true
-  BeforeCatch:     false
-  BeforeElse:      false
-  IndentBraces:    false
+  BeforeCatch:     true
+  BeforeElse:      true
+  IndentBraces:    true
   SplitEmptyFunction: true
-  SplitEmptyRecord: false
+  SplitEmptyRecord: true
   SplitEmptyNamespace: true
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Mozilla
