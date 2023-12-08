@@ -33,7 +33,7 @@ main(int argc, char* argv[])
 #pragma region "Init"
   google::InitGoogleLogging(argv[0]);
   FLAGS_alsologtostderr = true;
-  FLAGS_log_dir = "..\\..\\..\\..\\log";
+  FLAGS_log_dir = "..\\..\\..\\log";
   LOG(INFO) << "ZARA SEE YOU!";
 #pragma endregion
 
@@ -82,7 +82,7 @@ main(int argc, char* argv[])
 
     // Проверяем коллизию
     if (checkCollision(circle1, circle2)) {
-      std::cout << "Collision detected!" << std::endl;
+      LOG(WARNING) << "Collision detected!";
       circle1.setFillColor(sf::Color::Green);
       circle2.setFillColor(sf::Color::Yellow);
 
