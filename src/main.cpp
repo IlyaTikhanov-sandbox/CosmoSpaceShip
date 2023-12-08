@@ -37,16 +37,19 @@ main(int argc, char* argv[])
   LOG(INFO) << "ZARA SEE YOU!";
 #pragma endregion
 
-  sf::RenderWindow window(sf::VideoMode(800, 600), "Circle Collider SFML");
+  sf::Vector2u videoMode = { 800, 600 };
+  sf::RenderWindow window(sf::VideoMode(videoMode), "Circle Collider SFML");
 
   sf::CircleShape circle1(50.f);
   circle1.setFillColor(sf::Color::Blue);
-  circle1.setPosition(100.f, 100.f);
+  sf::Vector2f pos_1 = { 100.f, 100.f };
+  circle1.setPosition(pos_1);
   sf::Vector2f circle1Velocity(100.f, 80.f); // Пикселей в секунду
 
   sf::CircleShape circle2(70.f);
   circle2.setFillColor(sf::Color::Red);
-  circle2.setPosition(300.f, 300.f);
+  sf::Vector2f pos_2 = { 300.f, 300.f };
+  circle2.setPosition(pos_2);
   sf::Vector2f circle2Velocity(-120.f, -90.f); // Пикселей в секунду
 
   sf::Clock clock;

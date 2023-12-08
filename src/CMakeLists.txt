@@ -24,10 +24,10 @@ else()
   message("SFML NOT FOUND!!!")
 endif()
 
-find_package(
-  SFML 2.5
-  COMPONENTS system window graphics
-  REQUIRED)
+# find_package(
+#   SFML 2.5
+#   COMPONENTS system window graphics
+#   REQUIRED)
 
 find_library(GLOG_LIB glogd ${CMAKE_BINARY_DIR}/glog/Debug)
 if(GLOG_LIB)
