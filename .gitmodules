@@ -5,5 +5,5 @@
 	path = googletest
 	url = https://github.com/google/googletest.git
 [submodule "SFML"]
-    path = путь/к/папке/для/SFML
+    path = SFML
     url = https://github.com/SFML/SFML.git
