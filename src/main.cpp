@@ -37,72 +37,85 @@ main(int argc, char* argv[])
   LOG(INFO) << "ZARA SEE YOU!";
 #pragma endregion
 
+  // Параметр скорости перемещения кругов (можете настроить его по своему усмотрению)
+  const float circleVelocity = 90.f;
+
   sf::Vector2u videoMode = { 800, 600 };
   sf::RenderWindow window(sf::VideoMode(videoMode), "Circle Collider SFML");
+  window.setFramerateLimit(60);
 
   sf::CircleShape circle1(50.f);
   circle1.setFillColor(sf::Color::Blue);
   sf::Vector2f pos_1 = { 100.f, 100.f };
   circle1.setPosition(pos_1);
-  sf::Vector2f circle1Velocity(100.f, 80.f); // Пикселей в секунду
+  sf::Vector2f circle1Velocity(circleVelocity, circleVelocity); // Используем параметр скорости
 
   sf::CircleShape circle2(70.f);
   circle2.setFillColor(sf::Color::Red);
   sf::Vector2f pos_2 = { 300.f, 300.f };
   circle2.setPosition(pos_2);
-  sf::Vector2f circle2Velocity(-120.f, -90.f); // Пикселей в секунду
+  sf::Vector2f circle2Velocity(-circleVelocity, -circleVelocity); // Используем параметр скорости
 
-  sf::Clock clock;
+    sf::Clock clock;
+    sf::Time timePerFrame = sf::seconds(1.f / 60.f);
 
-  while (window.isOpen()) {
-    sf::Event event;
-    while (window.pollEvent(event)) {
-      if (event.type == sf::Event::Closed) {
-        window.close();
-      }
+    sf::Time timeSinceLastUpdate = sf::Time::Zero;
+    while (window.isOpen())
+    {
+        sf::Time deltaTime = clock.restart();
+        timeSinceLastUpdate += deltaTime;
+
+        while (timeSinceLastUpdate >= timePerFrame)
+        {
+            timeSinceLastUpdate -= timePerFrame;
+
+            // Двигаем круги на фиксированное расстояние, основанное на скорости
+            circle1.move(circle1Velocity * timePerFrame.asSeconds());
+            circle2.move(circle2Velocity * timePerFrame.asSeconds());
+        }
+
+        // Проверяем столкновение кругов
+        if (checkCollision(circle1, circle2))
+        {
+            LOG(WARNING) << "Collision detected!";
+            circle1.setFillColor(sf::Color::Green);
+            circle2.setFillColor(sf::Color::Yellow);
+
+            // Меняем направление движения кругов при коллизии
+            sf::Vector2f temp = circle1Velocity;
+            circle1Velocity = circle2Velocity;
+            circle2Velocity = temp;
+        }
+        else
+        {
+            circle1.setFillColor(sf::Color::Blue);
+            circle2.setFillColor(sf::Color::Red);
+        }
+
+        // Ограничиваем движение кругов в пределах окна
+        sf::Vector2f circle1Pos = circle1.getPosition();
+        sf::Vector2f circle2Pos = circle2.getPosition();
+
+        if (circle1Pos.x <= 0 || circle1Pos.x >= window.getSize().x - 2 * circle1.getRadius())
+            circle1Velocity.x = -circle1Velocity.x;
+        if (circle1Pos.y <= 0 || circle1Pos.y >= window.getSize().y - 2 * circle1.getRadius())
+            circle1Velocity.y = -circle1Velocity.y;
+
+        if (circle2Pos.x <= 0 || circle2Pos.x >= window.getSize().x - 2 * circle2.getRadius())
+            circle2Velocity.x = -circle2Velocity.x;
+        if (circle2Pos.y <= 0 || circle2Pos.y >= window.getSize().y - 2 * circle2.getRadius())
+            circle2Velocity.y = -circle2Velocity.y;
+
+        window.clear();
+        window.draw(circle1);
+        window.draw(circle2);
+        window.display();
+
+        // Ожидание до завершения кадра
+        sf::Time elapsedTime = clock.getElapsedTime();
+        if (elapsedTime < timePerFrame)
+            sf::sleep(timePerFrame - elapsedTime);
     }
-
-    float deltaTime = clock.restart().asSeconds();
-
-    // Обновляем позиции кругов на основе скорости и времени
-    circle1.move(circle1Velocity * deltaTime);
-    circle2.move(circle2Velocity * deltaTime);
-
-    // Ограничиваем движение кругов в пределах окна и меняем направление при столкновении с
-    // границами
-    sf::Vector2f circle1Pos = circle1.getPosition();
-    sf::Vector2f circle2Pos = circle2.getPosition();
-
-    if (circle1Pos.x <= 0 || circle1Pos.x >= window.getSize().x - 2 * circle1.getRadius())
-      circle1Velocity.x = -circle1Velocity.x;
-    if (circle1Pos.y <= 0 || circle1Pos.y >= window.getSize().y - 2 * circle1.getRadius())
-      circle1Velocity.y = -circle1Velocity.y;
-
-    if (circle2Pos.x <= 0 || circle2Pos.x >= window.getSize().x - 2 * circle2.getRadius())
-      circle2Velocity.x = -circle2Velocity.x;
-    if (circle2Pos.y <= 0 || circle2Pos.y >= window.getSize().y - 2 * circle2.getRadius())
-      circle2Velocity.y = -circle2Velocity.y;
-
-    // Проверяем коллизию
-    if (checkCollision(circle1, circle2)) {
-      LOG(WARNING) << "Collision detected!";
-      circle1.setFillColor(sf::Color::Green);
-      circle2.setFillColor(sf::Color::Yellow);
-
-      // Меняем направление движения при коллизии (можно также реализовать более сложную логику)
-      sf::Vector2f temp = circle1Velocity;
-      circle1Velocity = circle2Velocity;
-      circle2Velocity = temp;
-    } else {
-      circle1.setFillColor(sf::Color::Blue);
-      circle2.setFillColor(sf::Color::Red);
-    }
-
-    window.clear();
-    window.draw(circle1);
-    window.draw(circle2);
-    window.display();
-  }
 
   return 0;
 }
