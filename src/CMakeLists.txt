@@ -50,3 +50,14 @@ foreach(item IN LISTS assets)
         $<TARGET_FILE_DIR:${PROJECT_NAME}>/${dest_filename}
     )
 endforeach()
+
+set(ASSETS_DIR ../scripts)
+file(GLOB scripts ${ASSETS_DIR}/*.db)
+
+foreach(item IN LISTS scripts)
+    get_filename_component(dest_filename ${item} NAME)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${item} 
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/${dest_filename}
+    )
+endforeach()
