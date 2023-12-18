@@ -660,7 +660,7 @@ void Game::LoadAssets()
 	assets->AddFont("courier", "assets/cour.ttf", 48);
 
 	map = new Map("space_16_9", 1, m_resolutionSettings->getBaseTileSize());
-	map->LoadMap("assets/space_map_HD.map",
+	map->LoadMap("assets/space_map_HD.map", //the map is not used, TO DO: refactor this shit
 		m_resolutionSettings->getWidthInTiles(),
 		m_resolutionSettings->getHeightInTiles(),
 		m_resolutionSettings->getWindowWidth(),
