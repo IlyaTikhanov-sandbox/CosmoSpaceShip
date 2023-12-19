@@ -2,6 +2,8 @@
 
 #include "Components.h"
 
+class LogicComponent;
+
 class HealthComponent : public Component
 {
 public:

@@ -214,7 +214,7 @@ void KeyboardController::update()
 				{
 					transform->velocity.x = 0;
 					transform->direction.x = -1;
-					sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
+					sprite->setSpriteFlip(SDL_FLIP_HORIZONTAL);
 					sprite->Play(Anims::Idle);
 				}
 				break;
@@ -223,7 +223,7 @@ void KeyboardController::update()
 				{
 					transform->velocity.x = 0;
 					transform->direction.x = 0;
-					sprite->spriteFlip = SDL_FLIP_NONE;
+					sprite->setSpriteFlip(SDL_FLIP_NONE);
 					sprite->Play(Anims::Idle);
 				}
 				break;
