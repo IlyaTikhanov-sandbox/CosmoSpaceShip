@@ -36,21 +36,20 @@ else()
   message("GLOG NOT FOUND!!!")
 endif()
 
-target_link_libraries(${PROJECT_NAME} glog sfml-system sfml-window
-                      sfml-graphics)
+target_link_libraries(${PROJECT_NAME} PRIVATE sqlite3) 
+# sfml-system sfml-window sfml-graphics glog
 
-set(ASSETS_DIR ../assets)
-file(GLOB assets ${ASSETS_DIR}/*.*)
- 
-foreach(item IN LISTS assets)
-    get_filename_component(dest_filename ${item} NAME)
+# Укажите путь к папке, которую нужно скопировать
+set(ASSETS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../assets)
 
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${item} 
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>/${dest_filename}
-    )
-endforeach()
-
+# Копирование папки после построения проекта
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${ASSETS_DIR}
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
+    COMMENT "Copying assets directory to $<TARGET_FILE_DIR:${PROJECT_NAME}>"
+)
 set(ASSETS_DIR ../scripts)
 file(GLOB scripts ${ASSETS_DIR}/*.db)
 

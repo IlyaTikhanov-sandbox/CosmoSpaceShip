@@ -18,7 +18,7 @@ set(PATH_TO_SQLITE3_DIR "${PROJECT_SOURCE_DIR}/scripts/sqlite3/")
 
 # Добавление пути к директории с sqlite3.exe в переменную окружения PATH
 if(WIN32)
-    set(ENV{PATH} "${PATH_TO_SQLITE3_DIR}\\$ENV{PATH}")
+    set(ENV{PATH} "${PATH_TO_SQLITE3_DIR}")
 endif()
 
 # Команда для выполнения SQL-скрипта с помощью sqlite3
@@ -40,6 +40,9 @@ include_directories(glog)
 
 add_subdirectory(SFML)
 include_directories(SFML)
+
+add_subdirectory(SQLiteCpp)
+include_directories(SQLiteCpp)
 
 enable_testing()
 add_subdirectory(googletest)
