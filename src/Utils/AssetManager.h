@@ -1,4 +1,4 @@
-#include <SQLiteCpp/SQLiteCpp.h>
+/* #include <SQLiteCpp/SQLiteCpp.h>
 #include <iostream>
 #include <string>
 
@@ -33,3 +33,4 @@ public:
 private:
     std::string database;
 };
+ */

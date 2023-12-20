@@ -36,8 +36,9 @@ else()
   message("GLOG NOT FOUND!!!")
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE sqlite3) 
-# sfml-system sfml-window sfml-graphics glog
+# target_link_options(${PROJECT_NAME} PRIVATE "/NODEFAULTLIB:SQLiteCpp" "/NODEFAULTLIB:sqlite3")
+
+target_link_libraries(${PROJECT_NAME} PRIVATE sfml-system sfml-window sfml-graphics glog SQLiteCpp sqlite3) 
 
 # Укажите путь к папке, которую нужно скопировать
 set(ASSETS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../assets)

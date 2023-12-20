@@ -1,10 +1,10 @@
-#include "Utils/AssetManager.h"
-/* #include <SFML/Audio.hpp>
+// #include "Utils/AssetManager.h"
+#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp> */
-// #include <glog/logging.h>
+#include <glog/logging.h>
 #include <iostream>
 
-/* bool
+bool
 checkCollision(const sf::CircleShape& circle1, const sf::CircleShape& circle2)
 {
   // Получаем позиции центров окружностей
@@ -27,25 +27,25 @@ checkCollision(const sf::CircleShape& circle1, const sf::CircleShape& circle2)
   } else {
     return false; // Нет коллизии
   }
-} */
+}
 
 int
 main(int argc, char* argv[])
 {
 #pragma region "Init"
-/*   google::InitGoogleLogging(argv[0]);
+  google::InitGoogleLogging(argv[0]);
   FLAGS_alsologtostderr = true;
   FLAGS_log_dir = "..\\..\\..\\log";
-  LOG(INFO) << "ZARA SEE YOU!"; */
+  LOG(INFO) << "ZARA SEE YOU!";
 #pragma endregion
 
   std::string dbPath = "assets.db";
   // Создаем объект AssetManager, передавая путь к базе данных
-  AssetManager assetManager(dbPath);
+  /*   AssetManager assetManager(dbPath);
 
-  // Получаем данные ассета по его имени
-  std::string assetName = "Background Music";
-  Asset asset = assetManager.GetAssetByName(assetName);
+    // Получаем данные ассета по его имени
+    std::string assetName = "Background Music";
+    Asset asset = assetManager.GetAssetByName(assetName); */
 
   // Выводим информацию о пути ассета, если он найден
   /*   if (!asset.name.empty()) {
@@ -56,7 +56,7 @@ main(int argc, char* argv[])
     } */
 
   // Параметр скорости перемещения кругов (можете настроить его по своему усмотрению)
-/*   const float circleVelocity = 90.f;
+  const float circleVelocity = 90.f;
 
   sf::Vector2u videoMode = { 800, 600 };
   sf::RenderWindow window(sf::VideoMode(videoMode), "Circle Collider SFML");
@@ -128,7 +128,7 @@ main(int argc, char* argv[])
     sf::Time elapsedTime = clock.getElapsedTime();
     if (elapsedTime < timePerFrame)
       sf::sleep(timePerFrame - elapsedTime);
-  } */
+  }
 
   return 0;
 }

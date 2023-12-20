@@ -42,7 +42,7 @@ add_subdirectory(SFML)
 include_directories(SFML)
 
 add_subdirectory(SQLiteCpp)
-include_directories(SQLiteCpp)
+include_directories(SQLiteCpp/include)
 
 enable_testing()
 add_subdirectory(googletest)
