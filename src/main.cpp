@@ -1,6 +1,6 @@
-// #include "Utils/AssetManager.h"
+#include "Utils/AssetManager.h"
 #include <SFML/Audio.hpp>
-#include <SFML/Graphics.hpp> */
+#include <SFML/Graphics.hpp>
 #include <glog/logging.h>
 #include <iostream>
 
@@ -35,31 +35,69 @@ main(int argc, char* argv[])
 #pragma region "Init"
   google::InitGoogleLogging(argv[0]);
   FLAGS_alsologtostderr = true;
-  FLAGS_log_dir = "..\\..\\..\\log";
+  FLAGS_log_dir = "..\\..\\log";
   LOG(INFO) << "ZARA SEE YOU!";
 #pragma endregion
 
   std::string dbPath = "assets.db";
   // Создаем объект AssetManager, передавая путь к базе данных
-  /*   AssetManager assetManager(dbPath);
+  AssetManager assetManager(dbPath);
 
-    // Получаем данные ассета по его имени
-    std::string assetName = "Background Music";
-    Asset asset = assetManager.GetAssetByName(assetName); */
+  // Получаем данные ассета по его имени
+  std::string assetName = "Background Music";
+  std::string assetNameImage = "Main Character";
+  Asset asset = assetManager.GetAssetByName(assetName);
+  Asset assetImg = assetManager.GetAssetByName(assetNameImage);
 
   // Выводим информацию о пути ассета, если он найден
-  /*   if (!asset.name.empty()) {
-      LOG(INFO) << "Название ассета: " << asset.name << std::endl;
-      LOG(INFO) << "Путь ассета: " << asset.path << std::endl;
-    } else {
-      LOG(INFO) << "Ассет с названием '" << assetName << "' не найден." << std::endl;
-    } */
+  if (!asset.name.empty()) {
+    LOG(INFO) << "Name asset: " << asset.name << std::endl;
+    LOG(INFO) << "Path asset: " << asset.path << std::endl;
+  } else {
+    LOG(INFO) << "Asset with name: " << assetName << " not found!" << std::endl;
+  }
+
+  if (!assetImg.name.empty()) {
+    LOG(INFO) << "Name asset: " << assetImg.name << std::endl;
+    LOG(INFO) << "Path asset: " << assetImg.path << std::endl;
+  } else {
+    LOG(INFO) << "Asset with name: " << assetNameImage << " not found!" << std::endl;
+  }
+
+  sf::Music music;
+  if (!music.openFromFile(asset.path)) {
+    LOG(INFO) << "Error with audio!" << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  music.play();
+
+  sf::Texture texture;
+  if (!texture.loadFromFile(assetImg.path)) {
+    LOG(INFO) << "Error with image!" << std::endl;
+    return EXIT_FAILURE;
+  }
 
   // Параметр скорости перемещения кругов (можете настроить его по своему усмотрению)
   const float circleVelocity = 90.f;
 
   sf::Vector2u videoMode = { 800, 600 };
+
   sf::RenderWindow window(sf::VideoMode(videoMode), "Circle Collider SFML");
+  sf::RenderWindow window2(sf::VideoMode(videoMode), "SFML Image");
+
+  window.setPosition(sf::Vector2i(000, 000));
+  window2.setPosition(sf::Vector2i(900, 000));
+
+  sf::Sprite sprite(texture);
+
+  sf::Vector2u windowSize = window2.getSize();
+  sf::Vector2u textureSize = texture.getSize();
+  
+  // Устанавливаем масштаб спрайта по осям X и Y
+  sprite.setTextureRect(
+    sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(window2.getSize().x, window2.getSize().y)));
+
   window.setFramerateLimit(60);
 
   sf::CircleShape circle1(50.f);
@@ -78,7 +116,7 @@ main(int argc, char* argv[])
   sf::Time timePerFrame = sf::seconds(1.f / 60.f);
 
   sf::Time timeSinceLastUpdate = sf::Time::Zero;
-  while (window.isOpen()) {
+  while (window.isOpen() || window2.isOpen()) {
     sf::Time deltaTime = clock.restart();
     timeSinceLastUpdate += deltaTime;
 
@@ -120,9 +158,12 @@ main(int argc, char* argv[])
       circle2Velocity.y = -circle2Velocity.y;
 
     window.clear();
+    window2.clear();
     window.draw(circle1);
     window.draw(circle2);
+    window2.draw(sprite);
     window.display();
+    window2.display();
 
     // Ожидание до завершения кадра
     sf::Time elapsedTime = clock.getElapsedTime();

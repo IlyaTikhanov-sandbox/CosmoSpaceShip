@@ -24,11 +24,6 @@ else()
   message("SFML NOT FOUND!!!")
 endif()
 
-# find_package(
-#   SFML 2.5
-#   COMPONENTS system window graphics
-#   REQUIRED)
-
 find_library(GLOG_LIB glogd ${CMAKE_BINARY_DIR}/glog/Debug)
 if(GLOG_LIB)
   message("GLOG FOUND!!!")
@@ -36,9 +31,14 @@ else()
   message("GLOG NOT FOUND!!!")
 endif()
 
-# target_link_options(${PROJECT_NAME} PRIVATE "/NODEFAULTLIB:SQLiteCpp" "/NODEFAULTLIB:sqlite3")
+set(SQLITE3_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/scripts/sqlite3)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE sfml-system sfml-window sfml-graphics glog SQLiteCpp sqlite3) 
+find_library(Soci glogd ${CMAKE_BINARY_DIR}/soci)
+if(Soci)
+  message("SOCI FOUND!!!")
+else()
+  message("SOCI NOT FOUND!!!")
+endif()
 
 # Укажите путь к папке, которую нужно скопировать
 set(ASSETS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../assets)
@@ -61,3 +61,48 @@ foreach(item IN LISTS scripts)
         $<TARGET_FILE_DIR:${PROJECT_NAME}>/${dest_filename}
     )
 endforeach()
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_BINARY_DIR}/SFML/bin/Debug   # Путь к каталогу с DLL SFML
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>   # Путь к каталогу с исполняемым файлом
+)
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_BINARY_DIR}/SFML/bin/Debug   # Путь к каталогу с DLL SFML
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>   # Путь к каталогу с исполняемым файлом
+)
+
+file(GLOB glod_dll ${CMAKE_BINARY_DIR}/glog/Debug/*.dll)
+
+foreach(item IN LISTS glod_dll)
+    get_filename_component(dest_filename ${item} NAME)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${item} 
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/${dest_filename}
+    )
+endforeach()
+
+message("COPY bin_dll")
+file(GLOB bin_dll ${CMAKE_BINARY_DIR}/bin/Debug/*.dll)
+
+foreach(item IN LISTS bin_dll)
+    get_filename_component(dest_filename ${item} NAME)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${item} 
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/${dest_filename}
+    )
+endforeach()
+
+file(GLOB ext_libs_sfml_dll_x64 ${PROJECT_SOURCE_DIR}/SFML/extlibs/bin/x64/*.dll)
+
+foreach(item IN LISTS ext_libs_sfml_dll_x64)
+    get_filename_component(dest_filename ${item} NAME)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${item} 
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/${dest_filename}
+    )
+endforeach()
+
+target_link_libraries(${PROJECT_NAME} PRIVATE sfml-system sfml-window sfml-graphics sfml-audio glog SQLiteCpp sqlite3) 
