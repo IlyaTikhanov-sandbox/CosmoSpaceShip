@@ -93,7 +93,7 @@ main(int argc, char* argv[])
 
   sf::Vector2u windowSize = window2.getSize();
   sf::Vector2u textureSize = texture.getSize();
-  
+
   // Устанавливаем масштаб спрайта по осям X и Y
   sprite.setTextureRect(
     sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(window2.getSize().x, window2.getSize().y)));
@@ -117,33 +117,21 @@ main(int argc, char* argv[])
 
   sf::Time timeSinceLastUpdate = sf::Time::Zero;
   while (window.isOpen() || window2.isOpen()) {
-    sf::Time deltaTime = clock.restart();
-    timeSinceLastUpdate += deltaTime;
-
-    while (timeSinceLastUpdate >= timePerFrame) {
-      timeSinceLastUpdate -= timePerFrame;
-
-      // Двигаем круги на фиксированное расстояние, основанное на скорости
-      circle1.move(circle1Velocity * timePerFrame.asSeconds());
-      circle2.move(circle2Velocity * timePerFrame.asSeconds());
+    sf::Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == sf::Event::Closed) {
+        window.close();
+      }
     }
 
-    // Проверяем столкновение кругов
-    if (checkCollision(circle1, circle2)) {
-      LOG(WARNING) << "Collision detected!";
-      circle1.setFillColor(sf::Color::Green);
-      circle2.setFillColor(sf::Color::Yellow);
+    float deltaTime = clock.restart().asSeconds();
 
-      // Меняем направление движения кругов при коллизии
-      sf::Vector2f temp = circle1Velocity;
-      circle1Velocity = circle2Velocity;
-      circle2Velocity = temp;
-    } else {
-      circle1.setFillColor(sf::Color::Blue);
-      circle2.setFillColor(sf::Color::Red);
-    }
+    // Обновляем позиции кругов на основе скорости и времени
+    circle1.move(circle1Velocity * deltaTime);
+    circle2.move(circle2Velocity * deltaTime);
 
-    // Ограничиваем движение кругов в пределах окна
+    // Ограничиваем движение кругов в пределах окна и меняем направление при столкновении с
+    // границами
     sf::Vector2f circle1Pos = circle1.getPosition();
     sf::Vector2f circle2Pos = circle2.getPosition();
 
@@ -157,6 +145,21 @@ main(int argc, char* argv[])
     if (circle2Pos.y <= 0 || circle2Pos.y >= window.getSize().y - 2 * circle2.getRadius())
       circle2Velocity.y = -circle2Velocity.y;
 
+    // Проверяем коллизию
+    if (checkCollision(circle1, circle2)) {
+      std::cout << "Collision detected!" << std::endl;
+      circle1.setFillColor(sf::Color::Green);
+      circle2.setFillColor(sf::Color::Yellow);
+
+      // Меняем направление движения при коллизии (можно также реализовать более сложную логику)
+      sf::Vector2f temp = circle1Velocity;
+      circle1Velocity = circle2Velocity;
+      circle2Velocity = temp;
+    } else {
+      circle1.setFillColor(sf::Color::Blue);
+      circle2.setFillColor(sf::Color::Red);
+    }
+
     window.clear();
     window2.clear();
     window.draw(circle1);
@@ -164,11 +167,6 @@ main(int argc, char* argv[])
     window2.draw(sprite);
     window.display();
     window2.display();
-
-    // Ожидание до завершения кадра
-    sf::Time elapsedTime = clock.getElapsedTime();
-    if (elapsedTime < timePerFrame)
-      sf::sleep(timePerFrame - elapsedTime);
   }
 
   return 0;
