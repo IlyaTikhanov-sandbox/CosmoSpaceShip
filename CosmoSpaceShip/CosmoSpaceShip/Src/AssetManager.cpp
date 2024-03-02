@@ -20,7 +20,7 @@ void AssetManager::CreateProjectile(Vector2D pos, int width, Vector2D vel, int r
 	projectile.addComponent<ColliderComponent>("projectile");
 	projectile.addGroup(pr_group);
 	if (flip)
-		projectile.getComponent<SpriteComponent>().spriteFlip = SDL_FLIP_HORIZONTAL;
+		projectile.getComponent<SpriteComponent>().setSpriteFlip(SDL_FLIP_HORIZONTAL);
 	if (isAnimated)
 	{
 		projectile.getComponent<SpriteComponent>().Play(Anims::Idle);

@@ -85,7 +85,7 @@ void LogicComponent::Bossstay()
 	busy = false;
 	OwnTransform->velocity.x = 0;
 	OwnTransform->velocity.y = 0;
-	//sprite->Play(Anims::BossIdle);
+	sprite->Play(Anims::BossIdle);
 }
 
 void LogicComponent::update()

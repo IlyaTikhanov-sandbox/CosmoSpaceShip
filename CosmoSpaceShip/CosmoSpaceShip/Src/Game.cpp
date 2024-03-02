@@ -831,7 +831,7 @@ void Game::BossInit(float xpos, float ypos, const char * texture)
 	auto& boss(manager.addEntity());
 	boss.addGroup(groupBoss);
 	boss.addComponent<TransformComponent>(xpos, ypos, assets->GetTextureWidth(texture), assets->GetTextureWidth(texture), heavyShipScreenCoef, 1);
-	boss.addComponent<SpriteComponent>(texture, false,assets->GetTextureWidth(texture));
+	boss.addComponent<SpriteComponent>(texture, true,assets->GetTextureWidth(texture));
 	boss.addComponent<FigthComponent>(assets, boss_weapon, Game::groupLabels::groupEnemyProjectiles);
 	boss.addComponent<ColliderComponent>("Boss");
 	boss.addComponent<HealthComponent>(400);

@@ -8,6 +8,7 @@ class TransformComponent : public Component
 {
 public:
 
+/// --- Make it private
 	Vector2D position;
 	Vector2D velocity;
 	Vector2D direction;
@@ -26,6 +27,17 @@ public:
 	float screenCoeff = 0;
 
 	int speed = 3;
+/// --- 
+
+// --- Getters
+	int getWidth() { return width; }
+	int getHeight() { return height; }
+
+	Vector2D getPosition() { return position; }
+
+	int getScaledWidth() { return scaledWidth; }
+	int getScaledHeight() { return scaledHeight; }
+
 
 	Vector2D getCentralPosTOP(int width = 0)
 	{
@@ -36,7 +48,7 @@ public:
 	Vector2D getRightAttackPos(int width = 0) { return Vector2D(position.x + scaledWidth * (1-0.125) - (width / 2), position.y + scaledHeight * 0.65); }
 	TransformComponent(const TransformComponent & obj):position(obj.position), velocity(obj.velocity), height(obj.height),width(obj.width),scale(obj.scale),speed(obj.speed)
 	{}
-
+ 
 	TransformComponent& operator=(const TransformComponent & obj)
 	{
 		position = obj.position;
@@ -48,6 +60,8 @@ public:
 
 		return *this;
 	}
+
+// --- Constructors
 	TransformComponent()
 	{
 		position.Zero();

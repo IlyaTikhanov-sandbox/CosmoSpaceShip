@@ -13,11 +13,28 @@ enum LogicType
 
 class LogicComponent : public Component
 {
+private:
+	TransformComponent* OwnTransform;
+	SpriteComponent* sprite;
+	Stack <Vector2D>* pointStack;
+	FigthComponent* fighting;
+	HealthComponent* hp;
+
+	int wasHit = 0;
+
+	bool idle = false;
+	bool busy = false;
+	bool goLeft = false;
+
+	LogicType currentLogic = LogicType::LogicNone;
+
 public:
 	LogicComponent(LogicType logic = LogicType::LogicNone)
 	{
 		currentLogic = logic;
 	}
+
+	LogicType getCurrentLogic() { return currentLogic; }
 
 	void init() override
 	{
@@ -63,18 +80,5 @@ public:
 	}
 	
 
-private:
-	TransformComponent* OwnTransform;
-	SpriteComponent* sprite;
-	Stack <Vector2D> * pointStack;
-	FigthComponent* fighting;
-	HealthComponent* hp;
-	
-	int wasHit = 0;
 
-	bool idle = false;
-	bool busy = false;
-	bool goLeft = false;
-
-	LogicType currentLogic = LogicType::LogicNone;
 };
